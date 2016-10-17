@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using BeardedManStudios.Network;
 
-public class GunSwitchScript : MonoBehaviour {
+public class GunSwitchScript : NetworkedMonoBehavior {
 
 	[Header("Guns")]
 	//Current gun number
@@ -51,8 +52,15 @@ public class GunSwitchScript : MonoBehaviour {
 		//Start the tutorial text timer
 		StartCoroutine (TutorialTextTimer ());
 	}
-
-	void Update () {
+    private void Awake()
+    {
+        //AddNetworkVariable(() => move, x => move = (Vector3)x);
+    }
+    protected override void NetworkStart()
+    {
+        base.NetworkStart();
+    }
+    void Update () {
 
 		//Get the ammo left from the current gun
 		//and show it as a text

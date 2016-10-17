@@ -9,8 +9,8 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-
-public class MouseLook : MonoBehaviour
+using BeardedManStudios.Network;
+public class MouseLook : NetworkedMonoBehavior
 {
  
 	public enum RotationAxes { MouseX = 1, MouseY = 2 }
@@ -48,14 +48,23 @@ public class MouseLook : MonoBehaviour
 		
 		originalRotation = transform.localRotation;
 	}
- 
-	void Update ()
+    private void Awake()
+    {
+        AddNetworkVariable(() => rotationX, x => rotationX = (float)x);
+        AddNetworkVariable(() => rotationY, x => rotationY = (float)x);
+    }
+    protected override void NetworkStart()
+    {
+        base.NetworkStart();
+    }
+    void Update ()
 	{
 		if (axes == RotationAxes.MouseX)
 		{			
 			rotAverageX = 0f;
- 
-			rotationX += Input.GetAxis("Mouse X") * sensitivityX * Time.timeScale;
+
+            if (IsOwner)
+                rotationX += Input.GetAxis("Mouse X") * sensitivityX * Time.timeScale;
  
 			rotArrayX.Add(rotationX);
  
@@ -82,6 +91,7 @@ public class MouseLook : MonoBehaviour
  			{
  				invertFlag = -1f;
  			}
+            if (IsOwner)
 			rotationY += Input.GetAxis("Mouse Y") * sensitivityY * invertFlag * Time.timeScale;
 			
 			rotationY = Mathf.Clamp(rotationY, minimumY, maximumY);

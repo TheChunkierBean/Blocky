@@ -2,6 +2,7 @@
 
 using UnityEngine;
 using System.Collections;
+using BeardedManStudios.Network;
 
 public class LockMouse : MonoBehaviour
 {	
@@ -9,7 +10,6 @@ public class LockMouse : MonoBehaviour
 	{
 		LockCursor(true);
 	}
-
     void Update()
     {
     	// lock when mouse is clicked

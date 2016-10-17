@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
+using BeardedManStudios.Network;
 
-public class GunScript : MonoBehaviour	{
+public class GunScript : NetworkedMonoBehavior	{
 
 	//For the handgun animation
 	bool hasPlayed = false;
@@ -21,7 +22,7 @@ public class GunScript : MonoBehaviour	{
 	//Used for dual handguns 
 	bool shootLeft = true;
 	bool shootRight;
-
+    bool reload;
 	//Minigun rotaiton speed, start at 0
 	float minigunRotationSpeed = 0.0f;
 	//Check when the minigun should start shooting
@@ -320,6 +321,8 @@ public class GunScript : MonoBehaviour	{
 	//while reloading and shooting
 	public bool noSwitch = false;
 
+
+    private bool fire = false;
 	void Start ()
 	{
 		//Set the magazine size
@@ -390,9 +393,22 @@ public class GunScript : MonoBehaviour	{
 			Components.fullMag.GetComponent<MeshRenderer> ().enabled = false;
 		}
 	}
-
-	//Reload
-	IEnumerator Reload ()
+    private void Awake()
+    {
+        AddNetworkVariable(() => fire, x => fire = (bool)x);
+        AddNetworkVariable(() => bulletsLeft, x => bulletsLeft = (int)x);
+        AddNetworkVariable(() => isReloading, x => isReloading = (bool)x);
+        AddNetworkVariable(() => shootLeft, x => shootLeft = (bool)x);
+        AddNetworkVariable(() => shootRight, x => shootRight = (bool)x);
+        AddNetworkVariable(() => reload, x => reload = (bool)x);
+        AddNetworkVariable(() => outOfAmmo, x => outOfAmmo = (bool)x);
+    }
+    protected override void NetworkStart()
+    {
+        base.NetworkStart();
+    }
+    //Reload
+    IEnumerator Reload ()
 	{
 
 		//********** USED IN THE DEMO SCENES **********
@@ -564,7 +580,7 @@ public class GunScript : MonoBehaviour	{
 			            Components.casingSpawnPoint1.transform.rotation);
 			Instantiate (casingPrefab, Components.casingSpawnPoint2.transform.position, 
 			            Components.casingSpawnPoint2.transform.rotation);
-
+            
 			//Animate shells in
 			Components.ammo1.GetComponent<Animation> ().Play 
 				(Animations.sawnOffShotgunAmmoOneInAnim);
@@ -1143,7 +1159,7 @@ public class GunScript : MonoBehaviour	{
 			spawnBullets (3);
 			spawnBullets (2);
 			spawnBullets (1);
-		} 
+		}
 		if (bulletsLeft == 8) {
 			spawnBullets (8);
 			spawnBullets (7);
@@ -1639,7 +1655,6 @@ public class GunScript : MonoBehaviour	{
 		//Spawn shellcasing
 		Instantiate (casingPrefab, casingSpawnPoint.transform.position, 
 		            casingSpawnPoint.transform.rotation);
-		
 		//Wait before being able to shoot again
 		yield return new WaitForSeconds (0.25f);
 		
@@ -1727,37 +1742,44 @@ public class GunScript : MonoBehaviour	{
 
 	void Update ()
 	{
+        if (IsOwner)
+        {
+            fire = false;
+            reload = false;
+        }
+        if (IsOwner && Input.GetMouseButtonDown(0))
+            fire = true;
+        if (Input.GetKeyDown(KeyCode.R) && IsOwner)
+            reload = true;
+        //If handgun or silenced handgun is true
+        if (WeaponType.handgun == true || WeaponType.handgunSilencer == true) {
+            //Shoot when left click is pressed
+            if (fire && !outOfAmmo && !isReloading)
+            {
+                //Muzzleflash
+                StartCoroutine(Muzzleflash());
 
-		//If handgun or silenced handgun is true
-		if (WeaponType.handgun == true || WeaponType.handgunSilencer == true) {
-			//Shoot when left click is pressed
-			if (Input.GetMouseButtonDown (0) && !outOfAmmo && !isReloading) {
-			
-				//Muzzleflash
-				StartCoroutine (Muzzleflash ());
-			
-				//Play recoil animations
-				Components.holder.GetComponent<Animation> ().Play 
-					(Animations.recoilAnim);
-				Components.slider.GetComponent<Animation> ().Play 
-					(Animations.blowbackAnim);
-			
-				//Remove 1 bullet everytime you shoot
-				bulletsLeft -= 1;
+                //Play recoil animations
+                Components.holder.GetComponent<Animation>().Play
+                    (Animations.recoilAnim);
+                Components.slider.GetComponent<Animation>().Play
+                    (Animations.blowbackAnim);
 
-				//Play shoot sound
-				AudioSources.shootSound.Play ();
-			
-				//Play smoke particles
-				Components.smokeParticles.Play ();
-			
-				//Spawn casing
-				Instantiate (casingPrefab, casingSpawnPoint.transform.position, 
-				             casingSpawnPoint.transform.rotation);
-			}
-		
-			//If out of ammo
-			if (bulletsLeft == 0) {
+                //Remove 1 bullet everytime you shoot
+                bulletsLeft -= 1;
+
+                //Play shoot sound
+                AudioSources.shootSound.Play();
+
+                //Play smoke particles
+                Components.smokeParticles.Play();
+
+                //Spawn casing
+                Instantiate(casingPrefab, casingSpawnPoint.transform.position,
+                             casingSpawnPoint.transform.rotation);
+            }
+            //If out of ammo
+            if (bulletsLeft == 0) {
 				outOfAmmo = true;
 				//Play the slider animation once only
 				if (!hasPlayed) {
@@ -1774,9 +1796,8 @@ public class GunScript : MonoBehaviour	{
 
 		//If dual handguns is true
 		if (WeaponType.dualHandguns == true) {
-			//Shoot when left click is pressed
-			if (Input.GetMouseButtonDown (0) && !outOfAmmo && !isReloading) {
-				
+            //Shoot when left click is pressed
+            if (fire && !outOfAmmo && !isReloading) {
 				if (shootLeft == true && !shootRight) {
 					shootRight = true;
 					shootLeft = false;
@@ -1848,9 +1869,8 @@ public class GunScript : MonoBehaviour	{
 
 		//If sniper, silenced sniper, or shotgun is true
 		if (WeaponType.sniper == true || WeaponType.shotgun == true || WeaponType.sniperSilencer == true) {
-			//Shoot when left click is pressed
-			if (Input.GetMouseButtonDown (0) && !outOfAmmo && !isReloading) {
-				
+            //Shoot when left click is pressed\
+            if (fire && !outOfAmmo && !isReloading) {
 				//Muzzleflash
 				StartCoroutine (Muzzleflash ());
 				StartCoroutine (PumpOrBoltActionReload ());	
@@ -1878,11 +1898,10 @@ public class GunScript : MonoBehaviour	{
 		//If smg, assault rifle, silenced smg or silenced assault rifle is true
 		if (WeaponType.smg == true || WeaponType.assaultRifle == true || WeaponType.smgSilencer == true || WeaponType.assaultRifleSilencer == true || 
 		    WeaponType.assaultRifle2 == true || WeaponType.assaultRifleSilencer2 == true) {
-			//Shoot when left click is held down
-			if (Input.GetMouseButton (0)) {
+            //Shoot when left click is held down
+                if(fire){
 				if (Time.time - lastFired > 1 / fireRate && !outOfAmmo && !isReloading) {
 					lastFired = Time.time;
-					
 					//Muzzleflash
 					StartCoroutine (Muzzleflash ());
 					
@@ -1911,7 +1930,7 @@ public class GunScript : MonoBehaviour	{
 		//If machine gun is true
 		if (WeaponType.machineGun == true) {
 			//Shoot when left click is held down
-			if (Input.GetMouseButton (0)) {
+			if (fire) {
 				if (Time.time - lastFired > 1 / fireRate && !outOfAmmo && !isReloading) {
 					lastFired = Time.time;
 				
@@ -1970,17 +1989,17 @@ public class GunScript : MonoBehaviour	{
 					} 
 					if (bulletsLeft == 0) {
 						hideBullets (0);
-					} 
+					}
 				}
 			}
 
-			//Reload when R key is pressed, if reloaded when ammo is at 0
-			if (Input.GetKeyDown (KeyCode.R) && bulletsLeft == 0 && !isReloading) {
+            //Reload when R key is pressed, if reloaded when ammo is at 
+			if (reload && bulletsLeft == 0 && !isReloading) {
 				StartCoroutine (Reload ());
 			}
 
-			//Reload when R key is pressed, if reloaded when ammo is higher than 0
-			if (Input.GetKeyDown (KeyCode.R) && bulletsLeft > 0 && bulletsLeft < magazineSize && !isReloading) {
+            //Reload when R key is pressed, if reloaded when ammo is higher than 0
+			if (reload && bulletsLeft > 0 && bulletsLeft < magazineSize && !isReloading) {
 				StartCoroutine (ReloadMachineGun ());
 			}
 		}
@@ -1989,7 +2008,7 @@ public class GunScript : MonoBehaviour	{
 		if (WeaponType.rpg == true) {
 
 			//Shoot when left click is pressed
-			if (Input.GetMouseButtonDown (0) && !outOfAmmo && !isReloading) {
+			if (fire && !outOfAmmo && !isReloading) {
 				
 				//Reload and show muzzleflash
 				StartCoroutine (Muzzleflash ());
@@ -2019,7 +2038,7 @@ public class GunScript : MonoBehaviour	{
 		//If sawn off shotgun is true
 		if (WeaponType.sawnOffShotgun == true) {
 			//Shoot when left click is pressed
-			if (Input.GetMouseButtonDown (0) && !outOfAmmo && !isReloading) {
+			if (fire && !outOfAmmo && !isReloading) {
 			
 				//Muzzleflash
 				StartCoroutine (Muzzleflash ());
@@ -2043,7 +2062,7 @@ public class GunScript : MonoBehaviour	{
 		//If revolver 1 is true 
 		if (WeaponType.revolver1 == true) {
 			//Shoot when left click is pressed
-			if (Input.GetMouseButtonDown (0) && !outOfAmmo && !isReloading) {
+			if (fire && !outOfAmmo && !isReloading) {
 				
 				//Muzzleflash
 				StartCoroutine (Muzzleflash ());
@@ -2071,7 +2090,7 @@ public class GunScript : MonoBehaviour	{
 		//If revolver 2 is true
 		if (WeaponType.revolver2 == true) {
 			//Shoot when left click is pressed
-			if (Input.GetMouseButtonDown (0) && !outOfAmmo && !isReloading) {
+			if (fire && !outOfAmmo && !isReloading) {
 				
 				//Muzzleflash
 				StartCoroutine (Muzzleflash ());
@@ -2096,7 +2115,7 @@ public class GunScript : MonoBehaviour	{
 		//If grenade launcher is true
 		if (WeaponType.grenadeLauncher == true) {
 			//Shoot when left click is pressed
-			if (Input.GetMouseButtonDown (0) && !outOfAmmo && !isReloading) {
+			if (fire && !outOfAmmo && !isReloading) {
 				
 				//Muzzleflash
 				StartCoroutine (Muzzleflash ());
@@ -2129,7 +2148,7 @@ public class GunScript : MonoBehaviour	{
 		//If sniper 3 or sniper 6 is true
 		if (WeaponType.sniper3 == true || WeaponType.sniper6 == true) {
 			//Shoot when left click is pressed
-			if (Input.GetMouseButtonDown (0) && !outOfAmmo && !isReloading) {
+			if (fire && !outOfAmmo && !isReloading) {
 				
 				//Muzzleflash
 				StartCoroutine (Muzzleflash ());
@@ -2154,16 +2173,16 @@ public class GunScript : MonoBehaviour	{
 				//Spawn casing
 				Instantiate (casingPrefab, casingSpawnPoint.transform.position, 
 				             casingSpawnPoint.transform.rotation);
-
-				//Start the shooting delay
-				StartCoroutine(ShootingDelay());
+                //Start the shooting delay
+                StartCoroutine(ShootingDelay());
+                
 			}
 		}
 
 		//If hand grenade is true
 		if (WeaponType.handGrenade == true) {
 			//Shoot when left click is pressed
-			if (Input.GetMouseButtonDown (0) && !outOfAmmo && !isReloading) {
+			if (fire && !outOfAmmo && !isReloading) {
 
 				//Start the hand grenade reload
 				StartCoroutine(HandGrenadeReload());
@@ -2195,7 +2214,7 @@ public class GunScript : MonoBehaviour	{
 		//If minigun is true
 		if (WeaponType.minigun == true) {
 			//Shoot when left click is held down
-			if (Input.GetMouseButton (0)) {
+			if (fire) {
 				if (Time.time - lastFired > 1 / fireRate) {
 					lastFired = Time.time;
 					
@@ -2215,7 +2234,6 @@ public class GunScript : MonoBehaviour	{
 						//Spawn casing
 						Instantiate (casingPrefab, casingSpawnPoint.transform.position, 
 				      	 casingSpawnPoint.transform.rotation);
-
 						//Muzzleflash
 						StartCoroutine (Muzzleflash ());
 
@@ -2297,16 +2315,22 @@ public class GunScript : MonoBehaviour	{
 		//Disable for machine gun, hand grenade and minigun
 		if (!WeaponType.machineGun && !WeaponType.handGrenade && !WeaponType.minigun) {
 			//Reload when R key is pressed
-			if (Input.GetKeyDown (KeyCode.R) && bulletsLeft < magazineSize && !isReloading) {
+			if (reload && bulletsLeft < magazineSize && !isReloading) {
 				StartCoroutine (Reload ());
 			}
 		}
 
 		//Play dry fire sound when out of ammo, disable for minigun since it has unlimited ammo
-		if (Input.GetMouseButtonDown(0) && outOfAmmo == true && !isReloading 
+		if (fire && outOfAmmo == true && !isReloading 
 		    && !WeaponType.minigun) {
 			//Play dry fire sound if clicking when out of ammo
 			AudioSources.outOfAmmoClickSound.Play();
 		}
-	}
+        //new WaitForSeconds(3f);
+        if (!IsOwner)
+        {
+            fire = false;
+            reload = false;
+        }
+    }
 }
