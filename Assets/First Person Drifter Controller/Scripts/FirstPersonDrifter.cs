@@ -169,9 +169,9 @@ public class FirstPersonDrifter: NetworkedMonoBehavior
                     moveDirection = myTransform.TransformDirection(moveDirection);
                 }
             }
- 
-            // Apply gravity
-            moveDirection.y -= gravity * Time.deltaTime;
+
+    // Apply gravity
+    moveDirection.y -= gravity * Time.deltaTime;
             move = transform.position;
             // Move the controller, and set grounded true or false depending on whether we're standing on something
             grounded = (controller.Move(moveDirection * Time.deltaTime) & CollisionFlags.Below) != 0;

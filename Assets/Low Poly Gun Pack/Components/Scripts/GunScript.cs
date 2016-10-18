@@ -22,7 +22,6 @@ public class GunScript : NetworkedMonoBehavior	{
 	//Used for dual handguns 
 	bool shootLeft = true;
 	bool shootRight;
-    bool reload;
 	//Minigun rotaiton speed, start at 0
 	float minigunRotationSpeed = 0.0f;
 	//Check when the minigun should start shooting
@@ -321,8 +320,6 @@ public class GunScript : NetworkedMonoBehavior	{
 	//while reloading and shooting
 	public bool noSwitch = false;
 
-
-    private bool fire = false;
 	void Start ()
 	{
 		//Set the magazine size
@@ -395,12 +392,10 @@ public class GunScript : NetworkedMonoBehavior	{
 	}
     private void Awake()
     {
-        AddNetworkVariable(() => fire, x => fire = (bool)x);
         AddNetworkVariable(() => bulletsLeft, x => bulletsLeft = (int)x);
         AddNetworkVariable(() => isReloading, x => isReloading = (bool)x);
         AddNetworkVariable(() => shootLeft, x => shootLeft = (bool)x);
         AddNetworkVariable(() => shootRight, x => shootRight = (bool)x);
-        AddNetworkVariable(() => reload, x => reload = (bool)x);
         AddNetworkVariable(() => outOfAmmo, x => outOfAmmo = (bool)x);
     }
     protected override void NetworkStart()
@@ -1740,19 +1735,27 @@ public class GunScript : NetworkedMonoBehavior	{
 		noSwitch = false;
 	}
 
-	void Update ()
-	{
-        if (IsOwner)
+    void Update()
+    {
+        if (!IsOwner)
         {
-            fire = false;
-            reload = false;
+            return;
         }
-        if (IsOwner && Input.GetMouseButtonDown(0))
-            fire = true;
-        if (Input.GetKeyDown(KeyCode.R) && IsOwner)
-            reload = true;
+        if (Input.GetMouseButtonDown(0))
+        {
+            RPC("Fire", false, true);
+        }
+        if (Input.GetKeyDown(KeyCode.R))
+            RPC("Fire", true, false);
+        
+    }
+    [BRPC]
+    private void Fire(bool reload, bool fire)
+    {
+        
         //If handgun or silenced handgun is true
-        if (WeaponType.handgun == true || WeaponType.handgunSilencer == true) {
+        if (WeaponType.handgun == true || WeaponType.handgunSilencer == true)
+        {
             //Shoot when left click is pressed
             if (fire && !outOfAmmo && !isReloading)
             {
@@ -1779,558 +1782,618 @@ public class GunScript : NetworkedMonoBehavior	{
                              casingSpawnPoint.transform.rotation);
             }
             //If out of ammo
-            if (bulletsLeft == 0) {
-				outOfAmmo = true;
-				//Play the slider animation once only
-				if (!hasPlayed) {
-					Components.slider.GetComponent<Animation> ().Play 
-						(Animations.outOfAmmoAnim);
-					hasPlayed = true;
-					outOfAmmoSlider = true;
+            if (bulletsLeft == 0)
+            {
+                outOfAmmo = true;
+                //Play the slider animation once only
+                if (!hasPlayed)
+                {
+                    Components.slider.GetComponent<Animation>().Play
+                        (Animations.outOfAmmoAnim);
+                    hasPlayed = true;
+                    outOfAmmoSlider = true;
 
-					//Play slider sound
-					AudioSources.sliderSound.Play ();
-				}
-			}
-		}
+                    //Play slider sound
+                    AudioSources.sliderSound.Play();
+                }
+            }
+        }
 
-		//If dual handguns is true
-		if (WeaponType.dualHandguns == true) {
+        //If dual handguns is true
+        if (WeaponType.dualHandguns == true)
+        {
             //Shoot when left click is pressed
-            if (fire && !outOfAmmo && !isReloading) {
-				if (shootLeft == true && !shootRight) {
-					shootRight = true;
-					shootLeft = false;
-				} else {
-					shootRight = false;
-					shootLeft = true;
-				}
-				
-				if (shootLeft) {
-					
-					//Muzzleflash
-					StartCoroutine (Muzzleflash ());
-					//Play recoil animations
-					Components.holder.GetComponent<Animation> ().Play 
-						(Animations.recoilAnim);
-					Components.slider.GetComponent<Animation> ().Play 
-						(Animations.blowbackAnim);
-					
-					//Remove 1 bullet everytime you shoot
-					bulletsLeft -= 1;
+            if (fire && !outOfAmmo && !isReloading)
+            {
+                if (shootLeft == true && !shootRight)
+                {
+                    shootRight = true;
+                    shootLeft = false;
+                }
+                else
+                {
+                    shootRight = false;
+                    shootLeft = true;
+                }
 
-					//Play shoot sound
-					AudioSources.shootSound.Play ();
+                if (shootLeft)
+                {
 
-					//Play smoke particles
-					Components.smokeParticles.Play ();
-					//Spawn casing
-					Instantiate (casingPrefab, casingSpawnPoint.transform.position, 
-					             casingSpawnPoint.transform.rotation);
-					
-				} else {
-					
-					//Muzzleflash
-					StartCoroutine (MuzzleflashRight ());
-					//Play recoil animations
-					Components.holderRight.GetComponent<Animation> ().Play 
-						(Animations.recoilAnim);
-					Components.sliderRight.GetComponent<Animation> ().Play 
-						(Animations.blowbackAnim);
-					
-					//Remove 1 bullet everytime you shoot
-					bulletsLeft -= 1;
+                    //Muzzleflash
+                    StartCoroutine(Muzzleflash());
+                    //Play recoil animations
+                    Components.holder.GetComponent<Animation>().Play
+                        (Animations.recoilAnim);
+                    Components.slider.GetComponent<Animation>().Play
+                        (Animations.blowbackAnim);
 
-					//Play shoot sound
-					AudioSources.shootSound.Play ();
+                    //Remove 1 bullet everytime you shoot
+                    bulletsLeft -= 1;
 
-					//Play smoke particles
-					Components.smokeParticlesRight.Play ();
-					//Spawn casing
-					Instantiate (casingPrefab, Components.casingSpawnPointRight.transform.position, 
-					             Components.casingSpawnPointRight.transform.rotation);
-				}
-			}
+                    //Play shoot sound
+                    AudioSources.shootSound.Play();
 
-			//If out of ammo
-			if (bulletsLeft == 0) {
-				outOfAmmo = true;
-				//Play the slider animation once only
-				if (!hasPlayed) {
-					Components.slider.GetComponent<Animation> ().Play 
-						(Animations.outOfAmmoAnim);
-					Components.sliderRight.GetComponent<Animation> ().Play 
-						(Animations.outOfAmmoAnim);
-					hasPlayed = true;
-					outOfAmmoSlider = true;
-				}
-			}
-		}
+                    //Play smoke particles
+                    Components.smokeParticles.Play();
+                    //Spawn casing
+                    Instantiate(casingPrefab, casingSpawnPoint.transform.position,
+                                 casingSpawnPoint.transform.rotation);
 
-		//If sniper, silenced sniper, or shotgun is true
-		if (WeaponType.sniper == true || WeaponType.shotgun == true || WeaponType.sniperSilencer == true) {
+                }
+                else
+                {
+
+                    //Muzzleflash
+                    StartCoroutine(MuzzleflashRight());
+                    //Play recoil animations
+                    Components.holderRight.GetComponent<Animation>().Play
+                        (Animations.recoilAnim);
+                    Components.sliderRight.GetComponent<Animation>().Play
+                        (Animations.blowbackAnim);
+
+                    //Remove 1 bullet everytime you shoot
+                    bulletsLeft -= 1;
+
+                    //Play shoot sound
+                    AudioSources.shootSound.Play();
+
+                    //Play smoke particles
+                    Components.smokeParticlesRight.Play();
+                    //Spawn casing
+                    Instantiate(casingPrefab, Components.casingSpawnPointRight.transform.position,
+                                 Components.casingSpawnPointRight.transform.rotation);
+                }
+            }
+
+            //If out of ammo
+            if (bulletsLeft == 0)
+            {
+                outOfAmmo = true;
+                //Play the slider animation once only
+                if (!hasPlayed)
+                {
+                    Components.slider.GetComponent<Animation>().Play
+                        (Animations.outOfAmmoAnim);
+                    Components.sliderRight.GetComponent<Animation>().Play
+                        (Animations.outOfAmmoAnim);
+                    hasPlayed = true;
+                    outOfAmmoSlider = true;
+                }
+            }
+        }
+
+        //If sniper, silenced sniper, or shotgun is true
+        if (WeaponType.sniper == true || WeaponType.shotgun == true || WeaponType.sniperSilencer == true)
+        {
             //Shoot when left click is pressed\
-            if (fire && !outOfAmmo && !isReloading) {
-				//Muzzleflash
-				StartCoroutine (Muzzleflash ());
-				StartCoroutine (PumpOrBoltActionReload ());	
-				
-				//Play recoil animation
-				Components.holder.GetComponent<Animation> ().Play
-					(Animations.recoilAnim);
-				
-				//Remove 1 bullet everytime you shoot
-				bulletsLeft -= 1;
+            if (fire && !outOfAmmo && !isReloading)
+            {
+                //Muzzleflash
+                StartCoroutine(Muzzleflash());
+                StartCoroutine(PumpOrBoltActionReload());
 
-				//Play shoot sound
-				AudioSources.shootSound.Play ();
-				
-				//Play smoke particles
-				Components.smokeParticles.Play ();
+                //Play recoil animation
+                Components.holder.GetComponent<Animation>().Play
+                    (Animations.recoilAnim);
 
-				//Play spark particles if shotgun is true
-				if (WeaponType.shotgun == true) {
-					Components.sparkParticles.Play ();
-				}
-			}
-		}
+                //Remove 1 bullet everytime you shoot
+                bulletsLeft -= 1;
 
-		//If smg, assault rifle, silenced smg or silenced assault rifle is true
-		if (WeaponType.smg == true || WeaponType.assaultRifle == true || WeaponType.smgSilencer == true || WeaponType.assaultRifleSilencer == true || 
-		    WeaponType.assaultRifle2 == true || WeaponType.assaultRifleSilencer2 == true) {
+                //Play shoot sound
+                AudioSources.shootSound.Play();
+
+                //Play smoke particles
+                Components.smokeParticles.Play();
+
+                //Play spark particles if shotgun is true
+                if (WeaponType.shotgun == true)
+                {
+                    Components.sparkParticles.Play();
+                }
+            }
+        }
+
+        //If smg, assault rifle, silenced smg or silenced assault rifle is true
+        if (WeaponType.smg == true || WeaponType.assaultRifle == true || WeaponType.smgSilencer == true || WeaponType.assaultRifleSilencer == true ||
+            WeaponType.assaultRifle2 == true || WeaponType.assaultRifleSilencer2 == true)
+        {
             //Shoot when left click is held down
-                if(fire){
-				if (Time.time - lastFired > 1 / fireRate && !outOfAmmo && !isReloading) {
-					lastFired = Time.time;
-					//Muzzleflash
-					StartCoroutine (Muzzleflash ());
-					
-					//Play recoil and eject animations
-					Components.holder.GetComponent<Animation> ().Play
-						(Animations.recoilAnim);
-					Components.ejectSlider.GetComponent<Animation> ().Play
-						(Animations.slideEjectAnim);
-					
-					//Remove 1 bullet everytime you shoot
-					bulletsLeft -= 1;
+            if (fire)
+            {
+                if (Time.time - lastFired > 1 / fireRate && !outOfAmmo && !isReloading)
+                {
+                    lastFired = Time.time;
+                    //Muzzleflash
+                    StartCoroutine(Muzzleflash());
 
-					//Play shoot sound
-					AudioSources.shootSound.Play ();
-					
-					//Play smoke particles
-					Components.smokeParticles.Play ();
-					
-					//Spawn casing
-					Instantiate (casingPrefab, casingSpawnPoint.transform.position, 
-					            casingSpawnPoint.transform.rotation);
-				}
-			}
-		}
+                    //Play recoil and eject animations
+                    Components.holder.GetComponent<Animation>().Play
+                        (Animations.recoilAnim);
+                    Components.ejectSlider.GetComponent<Animation>().Play
+                        (Animations.slideEjectAnim);
 
-		//If machine gun is true
-		if (WeaponType.machineGun == true) {
-			//Shoot when left click is held down
-			if (fire) {
-				if (Time.time - lastFired > 1 / fireRate && !outOfAmmo && !isReloading) {
-					lastFired = Time.time;
-				
-					//Rotate the sphere holding the bullets 
-					//Make it look like they are "spinning" to the right
-					Components.sphereRotate.GetComponent<Animation> ().Play
-					(Animations.machineGunSphereRotateAnim);
-				
-					//Muzzleflash
-					StartCoroutine (Muzzleflash ());
-				
-					//Play recoil animation
-					Components.holder.GetComponent<Animation> ().Play
-					(Animations.recoilAnim);
-				
-					//Remove 1 bullet everytime you shoot
-					bulletsLeft -= 1;
+                    //Remove 1 bullet everytime you shoot
+                    bulletsLeft -= 1;
 
-					//Play shoot sound
-					AudioSources.shootSound.Play ();
-				
-					//Play smoke particles
-					Components.smokeParticles.Play ();
-				
-					//Spawn casing
-					Instantiate (casingPrefab, casingSpawnPoint.transform.position, 
-					             casingSpawnPoint.transform.rotation);
-				
-					//Hide bullets in bullet belt when low ammo
-					if (bulletsLeft == 9) {
-						hideBullets (9);
-					} 
-					if (bulletsLeft == 8) {
-						hideBullets (8);
-					} 
-					if (bulletsLeft == 7) {
-						hideBullets (7);
-					} 
-					if (bulletsLeft == 6) {
-						hideBullets (6);
-					} 
-					if (bulletsLeft == 5) {
-						hideBullets (5);
-					} 
-					if (bulletsLeft == 4) {
-						hideBullets (4);
-					} 
-					if (bulletsLeft == 3) {
-						hideBullets (3);
-					} 
-					if (bulletsLeft == 2) {
-						hideBullets (2);
-					} 
-					if (bulletsLeft == 1) {
-						hideBullets (1);
-					} 
-					if (bulletsLeft == 0) {
-						hideBullets (0);
-					}
-				}
-			}
+                    //Play shoot sound
+                    AudioSources.shootSound.Play();
+
+                    //Play smoke particles
+                    Components.smokeParticles.Play();
+
+                    //Spawn casing
+                    Instantiate(casingPrefab, casingSpawnPoint.transform.position,
+                                casingSpawnPoint.transform.rotation);
+                }
+            }
+        }
+
+        //If machine gun is true
+        if (WeaponType.machineGun == true)
+        {
+            //Shoot when left click is held down
+            if (fire)
+            {
+                if (Time.time - lastFired > 1 / fireRate && !outOfAmmo && !isReloading)
+                {
+                    lastFired = Time.time;
+
+                    //Rotate the sphere holding the bullets 
+                    //Make it look like they are "spinning" to the right
+                    Components.sphereRotate.GetComponent<Animation>().Play
+                    (Animations.machineGunSphereRotateAnim);
+
+                    //Muzzleflash
+                    StartCoroutine(Muzzleflash());
+
+                    //Play recoil animation
+                    Components.holder.GetComponent<Animation>().Play
+                    (Animations.recoilAnim);
+
+                    //Remove 1 bullet everytime you shoot
+                    bulletsLeft -= 1;
+
+                    //Play shoot sound
+                    AudioSources.shootSound.Play();
+
+                    //Play smoke particles
+                    Components.smokeParticles.Play();
+
+                    //Spawn casing
+                    Instantiate(casingPrefab, casingSpawnPoint.transform.position,
+                                 casingSpawnPoint.transform.rotation);
+
+                    //Hide bullets in bullet belt when low ammo
+                    if (bulletsLeft == 9)
+                    {
+                        hideBullets(9);
+                    }
+                    if (bulletsLeft == 8)
+                    {
+                        hideBullets(8);
+                    }
+                    if (bulletsLeft == 7)
+                    {
+                        hideBullets(7);
+                    }
+                    if (bulletsLeft == 6)
+                    {
+                        hideBullets(6);
+                    }
+                    if (bulletsLeft == 5)
+                    {
+                        hideBullets(5);
+                    }
+                    if (bulletsLeft == 4)
+                    {
+                        hideBullets(4);
+                    }
+                    if (bulletsLeft == 3)
+                    {
+                        hideBullets(3);
+                    }
+                    if (bulletsLeft == 2)
+                    {
+                        hideBullets(2);
+                    }
+                    if (bulletsLeft == 1)
+                    {
+                        hideBullets(1);
+                    }
+                    if (bulletsLeft == 0)
+                    {
+                        hideBullets(0);
+                    }
+                }
+            }
 
             //Reload when R key is pressed, if reloaded when ammo is at 
-			if (reload && bulletsLeft == 0 && !isReloading) {
-				StartCoroutine (Reload ());
-			}
+            if (reload && bulletsLeft == 0 && !isReloading)
+            {
+                StartCoroutine(Reload());
+            }
 
             //Reload when R key is pressed, if reloaded when ammo is higher than 0
-			if (reload && bulletsLeft > 0 && bulletsLeft < magazineSize && !isReloading) {
-				StartCoroutine (ReloadMachineGun ());
-			}
-		}
+            if (reload && bulletsLeft > 0 && bulletsLeft < magazineSize && !isReloading)
+            {
+                StartCoroutine(ReloadMachineGun());
+            }
+        }
 
-		//If rpg is true
-		if (WeaponType.rpg == true) {
+        //If rpg is true
+        if (WeaponType.rpg == true)
+        {
 
-			//Shoot when left click is pressed
-			if (fire && !outOfAmmo && !isReloading) {
-				
-				//Reload and show muzzleflash
-				StartCoroutine (Muzzleflash ());
-				StartCoroutine (Reload ());
-				
-				//Play recoil animation
-				Components.holder.GetComponent<Animation> ().Play
-					(Animations.recoilAnim);
+            //Shoot when left click is pressed
+            if (fire && !outOfAmmo && !isReloading)
+            {
 
-				//Remove 1 bullet everytime you shoot
-				bulletsLeft -= 1;
+                //Reload and show muzzleflash
+                StartCoroutine(Muzzleflash());
+                StartCoroutine(Reload());
 
-				//Play shoot sound
-				AudioSources.shootSound.Play();
-				
-				//Instantiate the projectile
-				Instantiate (Components.projectilePrefab, Components.projectileSpawnPoint.transform.position, 
-				            Components.projectileSpawnPoint.transform.rotation);
-				
-				//Play smoke and spark particles
-				Components.smokeParticles.Play ();
-				Components.smokeParticlesBack.Play ();
-				Components.sparkParticles.Play ();
-			}
-		}
+                //Play recoil animation
+                Components.holder.GetComponent<Animation>().Play
+                    (Animations.recoilAnim);
 
-		//If sawn off shotgun is true
-		if (WeaponType.sawnOffShotgun == true) {
-			//Shoot when left click is pressed
-			if (fire && !outOfAmmo && !isReloading) {
-			
-				//Muzzleflash
-				StartCoroutine (Muzzleflash ());
-			
-				//Play recoil and eject animations
-				Components.holder.GetComponent<Animation> ().Play 
-					(Animations.recoilAnim);
-			
-				//Remove 1 bullet everytime you shoot
-				bulletsLeft -= 1;
+                //Remove 1 bullet everytime you shoot
+                bulletsLeft -= 1;
 
-				//Play shoot sound
-				AudioSources.shootSound.Play ();
-			
-				//Play smoke and spark particles
-				Components.smokeParticles.Play ();
-				Components.sparkParticles.Play ();
-			}
-		}
+                //Play shoot sound
+                AudioSources.shootSound.Play();
 
-		//If revolver 1 is true 
-		if (WeaponType.revolver1 == true) {
-			//Shoot when left click is pressed
-			if (fire && !outOfAmmo && !isReloading) {
-				
-				//Muzzleflash
-				StartCoroutine (Muzzleflash ());
-				
-				//Play recoil and eject animations
-				Components.holder.GetComponent<Animation> ().Play 
-					(Animations.recoilAnim);
-				Components.slider.GetComponent<Animation>().Play
-					(Animations.slideReloadAnim);
-				
-				//Remove 1 bullet everytime you shoot
-				bulletsLeft -= 1;
+                //Instantiate the projectile
+                Instantiate(Components.projectilePrefab, Components.projectileSpawnPoint.transform.position,
+                            Components.projectileSpawnPoint.transform.rotation);
 
-				//Play shoot sound
-				AudioSources.shootSound.Play ();
-				
-				//Play smoke particles
-				Components.smokeParticles.Play ();
+                //Play smoke and spark particles
+                Components.smokeParticles.Play();
+                Components.smokeParticlesBack.Play();
+                Components.sparkParticles.Play();
+            }
+        }
 
-				//Start the revolver delay
-				StartCoroutine(RevolverDelay());
-			}
-		}
+        //If sawn off shotgun is true
+        if (WeaponType.sawnOffShotgun == true)
+        {
+            //Shoot when left click is pressed
+            if (fire && !outOfAmmo && !isReloading)
+            {
 
-		//If revolver 2 is true
-		if (WeaponType.revolver2 == true) {
-			//Shoot when left click is pressed
-			if (fire && !outOfAmmo && !isReloading) {
-				
-				//Muzzleflash
-				StartCoroutine (Muzzleflash ());
-				
-				//Play recoil and eject animations
-				Components.holder.GetComponent<Animation> ().Play 
-					(Animations.recoilAnim);
-				Components.slider.GetComponent<Animation>().Play
-					(Animations.slideReloadAnim);
-				
-				//Remove 1 bullet everytime you shoot
-				bulletsLeft -= 1;
+                //Muzzleflash
+                StartCoroutine(Muzzleflash());
 
-				//Play shoot sound
-				AudioSources.shootSound.Play ();
-				
-				//Play smoke particles
-				Components.smokeParticles.Play ();
-			}
-		}
+                //Play recoil and eject animations
+                Components.holder.GetComponent<Animation>().Play
+                    (Animations.recoilAnim);
 
-		//If grenade launcher is true
-		if (WeaponType.grenadeLauncher == true) {
-			//Shoot when left click is pressed
-			if (fire && !outOfAmmo && !isReloading) {
-				
-				//Muzzleflash
-				StartCoroutine (Muzzleflash ());
-				
-				//Play recoil and eject animations
-				Components.holder.GetComponent<Animation> ().Play 
-					(Animations.recoilAnim);
-				Components.slider.GetComponent<Animation>().Play
-					(Animations.slideReloadAnim);
+                //Remove 1 bullet everytime you shoot
+                bulletsLeft -= 1;
 
-				//Instantiate the projectile
-				Instantiate (Components.projectilePrefab, Components.projectileSpawnPoint.transform.position, 
-				             Components.projectileSpawnPoint.transform.rotation);
-				
-				//Remove 1 bullet everytime you shoot
-				bulletsLeft -= 1;
+                //Play shoot sound
+                AudioSources.shootSound.Play();
 
-				//Play shoot sound
-				AudioSources.shootSound.Play();
-				
-				//Play smoke and spark particles
-				Components.smokeParticles.Play ();
-				Components.sparkParticles.Play ();
+                //Play smoke and spark particles
+                Components.smokeParticles.Play();
+                Components.sparkParticles.Play();
+            }
+        }
 
-				//Start the shooting delay
-				StartCoroutine(ShootingDelay());
-			}
-		}
+        //If revolver 1 is true 
+        if (WeaponType.revolver1 == true)
+        {
+            //Shoot when left click is pressed
+            if (fire && !outOfAmmo && !isReloading)
+            {
 
-		//If sniper 3 or sniper 6 is true
-		if (WeaponType.sniper3 == true || WeaponType.sniper6 == true) {
-			//Shoot when left click is pressed
-			if (fire && !outOfAmmo && !isReloading) {
-				
-				//Muzzleflash
-				StartCoroutine (Muzzleflash ());
-				
-				//Play recoil animation
-				Components.holder.GetComponent<Animation> ().Play
-					(Animations.recoilAnim);
-				Components.ejectSlider.GetComponent<Animation> ().Play
-					(Animations.slideEjectAnim);
-				
-				//Remove 1 bullet everytime you shoot
-				bulletsLeft -= 1;
+                //Muzzleflash
+                StartCoroutine(Muzzleflash());
 
-				//Play shoot sound
-				AudioSources.shootSound.Play ();
-				//Play slider reload sound
-				AudioSources.sliderReloadSound.Play ();
-				
-				//Play smoke particles
-				Components.smokeParticles.Play ();
+                //Play recoil and eject animations
+                Components.holder.GetComponent<Animation>().Play
+                    (Animations.recoilAnim);
+                Components.slider.GetComponent<Animation>().Play
+                    (Animations.slideReloadAnim);
 
-				//Spawn casing
-				Instantiate (casingPrefab, casingSpawnPoint.transform.position, 
-				             casingSpawnPoint.transform.rotation);
+                //Remove 1 bullet everytime you shoot
+                bulletsLeft -= 1;
+
+                //Play shoot sound
+                AudioSources.shootSound.Play();
+
+                //Play smoke particles
+                Components.smokeParticles.Play();
+
+                //Start the revolver delay
+                StartCoroutine(RevolverDelay());
+            }
+        }
+
+        //If revolver 2 is true
+        if (WeaponType.revolver2 == true)
+        {
+            //Shoot when left click is pressed
+            if (fire && !outOfAmmo && !isReloading)
+            {
+
+                //Muzzleflash
+                StartCoroutine(Muzzleflash());
+
+                //Play recoil and eject animations
+                Components.holder.GetComponent<Animation>().Play
+                    (Animations.recoilAnim);
+                Components.slider.GetComponent<Animation>().Play
+                    (Animations.slideReloadAnim);
+
+                //Remove 1 bullet everytime you shoot
+                bulletsLeft -= 1;
+
+                //Play shoot sound
+                AudioSources.shootSound.Play();
+
+                //Play smoke particles
+                Components.smokeParticles.Play();
+            }
+        }
+
+        //If grenade launcher is true
+        if (WeaponType.grenadeLauncher == true)
+        {
+            //Shoot when left click is pressed
+            if (fire && !outOfAmmo && !isReloading)
+            {
+
+                //Muzzleflash
+                StartCoroutine(Muzzleflash());
+
+                //Play recoil and eject animations
+                Components.holder.GetComponent<Animation>().Play
+                    (Animations.recoilAnim);
+                Components.slider.GetComponent<Animation>().Play
+                    (Animations.slideReloadAnim);
+
+                //Instantiate the projectile
+                Instantiate(Components.projectilePrefab, Components.projectileSpawnPoint.transform.position,
+                             Components.projectileSpawnPoint.transform.rotation);
+
+                //Remove 1 bullet everytime you shoot
+                bulletsLeft -= 1;
+
+                //Play shoot sound
+                AudioSources.shootSound.Play();
+
+                //Play smoke and spark particles
+                Components.smokeParticles.Play();
+                Components.sparkParticles.Play();
+
                 //Start the shooting delay
                 StartCoroutine(ShootingDelay());
-                
-			}
-		}
-
-		//If hand grenade is true
-		if (WeaponType.handGrenade == true) {
-			//Shoot when left click is pressed
-			if (fire && !outOfAmmo && !isReloading) {
-
-				//Start the hand grenade reload
-				StartCoroutine(HandGrenadeReload());
-
-				//Remove 1 bullet everytime you shoot
-				bulletsLeft -= 1;
-
-				//Play throw/shoot sound
-				AudioSources.shootSound.Play ();
-
-				//Instantiate the grenade prefab
-				GameObject grenadePrefab;
-				grenadePrefab = Instantiate(Components.handGrenadePrefab, 
-				                            transform.position, transform.rotation) as GameObject;
-
-				//Add forward force to the grenade prefab
-				grenadePrefab.GetComponent<Rigidbody>().AddForce
-					(transform.forward * grenadeThrowForce);
-
-				//Add rotation force to the grenade prefab
-				grenadePrefab.GetComponent<Rigidbody>().AddRelativeTorque (
-					Random.Range(minimumGrenadeRotation, maximumGrenadeRotation), //X Axis
-					Random.Range(minimumGrenadeRotation, maximumGrenadeRotation), //Y Axis
-					Random.Range(minimumGrenadeRotation, maximumGrenadeRotation)  //Z Axis
-					* Time.deltaTime);
-			}
-		}
-
-		//If minigun is true
-		if (WeaponType.minigun == true) {
-			//Shoot when left click is held down
-			if (fire) {
-				if (Time.time - lastFired > 1 / fireRate) {
-					lastFired = Time.time;
-					
-					if (allowMinigunShooting == true) {
-						//Play recoil animation
-						Components.holder.GetComponent<Animation> ().Play
-							(Animations.recoilAnim);
-					
-						//Play smoke particles
-						Components.smokeParticles.Play ();
-						//Play bullet tracer particles
-						Components.bulletTracerParticles.Play();
-
-						//Play shoot sound
-						AudioSources.shootSound.Play ();
-					
-						//Spawn casing
-						Instantiate (casingPrefab, casingSpawnPoint.transform.position, 
-				      	 casingSpawnPoint.transform.rotation);
-						//Muzzleflash
-						StartCoroutine (Muzzleflash ());
-
-					}
-					//Increase the minigun rotation speed while holding down left click
-					minigunRotationSpeed += 1900.0f * Time.deltaTime;
-
-					//Play spin up sound
-					if (!spinUpSoundHasPlayed) {
-
-						//Set the spin up sound as the current audio clip
-						AudioSources.minigunSpinUpDownSource.clip 
-							= AudioSources.minigunSpinUpSound;
-
-						//Play spin up sound
-						AudioSources.minigunSpinUpDownSource.Play ();
-
-						spinUpSoundHasPlayed = true;
-						spinDownSoundHasPlayed = false;
-					}
-				}
-			//Start decreasing the minigun rotation speed when left click is released
-			} else if (minigunRotationSpeed > 0) {
-				minigunRotationSpeed -= 300.0f * Time.deltaTime;
-
-				spinLoopHasPlayed = false;
-
-				//Stop the spin loop sound
-				AudioSources.minigunSpinLoopSound.Stop ();
-
-				//Play spin up sound
-				if (!spinDownSoundHasPlayed) {
-
-					//Set the spin down sound as the current audio clip
-					AudioSources.minigunSpinUpDownSource.clip 
-						= AudioSources.minigunSpinDownSound;
-
-					//Play spin up sound
-					AudioSources.minigunSpinUpDownSource.Play ();
-					
-					spinDownSoundHasPlayed = true;
-					spinUpSoundHasPlayed = false;
-				}
-			}
-			//Set the rotation speed to zero if the rotaiton speed is lower than zero
-			if (minigunRotationSpeed < 0) {
-				minigunRotationSpeed = 0;
-			}
-			//Stop increasing the rotation speed when it has reached 875.0f
-			if (minigunRotationSpeed > 875.0f) {
-				minigunRotationSpeed = 875.0f;
-			}
-			//Allow the minigun to shoot when the rotation speed is higher than 800.0f
-			if (minigunRotationSpeed > 800.0f) {
-				allowMinigunShooting = true;
-
-				if (!spinLoopHasPlayed) {
-					//Play the spin loop sound
-					AudioSources.minigunSpinLoopSound.Play ();
-					
-					spinLoopHasPlayed = true;
-				}
-
-			//Dont allow shooting when the rotation speed is lower than 750.0f
-			} else if (minigunRotationSpeed < 750.0f) {
-				allowMinigunShooting = false;
-			}
-			//Rotate the barrels depending on the minigun rotation speed
-			Components.barrels.transform.Rotate
-				(Vector3.forward * minigunRotationSpeed * Time.deltaTime);
-
-		}
-
-		//If out of ammo
-		if (bulletsLeft == 0) {
-			outOfAmmo = true;
-		}
-
-		//Disable for machine gun, hand grenade and minigun
-		if (!WeaponType.machineGun && !WeaponType.handGrenade && !WeaponType.minigun) {
-			//Reload when R key is pressed
-			if (reload && bulletsLeft < magazineSize && !isReloading) {
-				StartCoroutine (Reload ());
-			}
-		}
-
-		//Play dry fire sound when out of ammo, disable for minigun since it has unlimited ammo
-		if (fire && outOfAmmo == true && !isReloading 
-		    && !WeaponType.minigun) {
-			//Play dry fire sound if clicking when out of ammo
-			AudioSources.outOfAmmoClickSound.Play();
-		}
-        //new WaitForSeconds(3f);
-        if (!IsOwner)
-        {
-            fire = false;
-            reload = false;
+            }
         }
+
+        //If sniper 3 or sniper 6 is true
+        if (WeaponType.sniper3 == true || WeaponType.sniper6 == true)
+        {
+            //Shoot when left click is pressed
+            if (fire && !outOfAmmo && !isReloading)
+            {
+
+                //Muzzleflash
+                StartCoroutine(Muzzleflash());
+
+                //Play recoil animation
+                Components.holder.GetComponent<Animation>().Play
+                    (Animations.recoilAnim);
+                Components.ejectSlider.GetComponent<Animation>().Play
+                    (Animations.slideEjectAnim);
+
+                //Remove 1 bullet everytime you shoot
+                bulletsLeft -= 1;
+
+                //Play shoot sound
+                AudioSources.shootSound.Play();
+                //Play slider reload sound
+                AudioSources.sliderReloadSound.Play();
+
+                //Play smoke particles
+                Components.smokeParticles.Play();
+
+                //Spawn casing
+                Instantiate(casingPrefab, casingSpawnPoint.transform.position,
+                             casingSpawnPoint.transform.rotation);
+                //Start the shooting delay
+                StartCoroutine(ShootingDelay());
+
+            }
+        }
+
+        //If hand grenade is true
+        if (WeaponType.handGrenade == true)
+        {
+            //Shoot when left click is pressed
+            if (fire && !outOfAmmo && !isReloading)
+            {
+
+                //Start the hand grenade reload
+                StartCoroutine(HandGrenadeReload());
+
+                //Remove 1 bullet everytime you shoot
+                bulletsLeft -= 1;
+
+                //Play throw/shoot sound
+                AudioSources.shootSound.Play();
+
+                //Instantiate the grenade prefab
+                GameObject grenadePrefab;
+                grenadePrefab = Instantiate(Components.handGrenadePrefab,
+                                            transform.position, transform.rotation) as GameObject;
+
+                //Add forward force to the grenade prefab
+                grenadePrefab.GetComponent<Rigidbody>().AddForce
+                    (transform.forward * grenadeThrowForce);
+
+                //Add rotation force to the grenade prefab
+                grenadePrefab.GetComponent<Rigidbody>().AddRelativeTorque(
+                    Random.Range(minimumGrenadeRotation, maximumGrenadeRotation), //X Axis
+                    Random.Range(minimumGrenadeRotation, maximumGrenadeRotation), //Y Axis
+                    Random.Range(minimumGrenadeRotation, maximumGrenadeRotation)  //Z Axis
+                    * Time.deltaTime);
+            }
+        }
+
+        //If minigun is true
+        if (WeaponType.minigun == true)
+        {
+            //Shoot when left click is held down
+            if (fire)
+            {
+                if (Time.time - lastFired > 1 / fireRate)
+                {
+                    lastFired = Time.time;
+
+                    if (allowMinigunShooting == true)
+                    {
+                        //Play recoil animation
+                        Components.holder.GetComponent<Animation>().Play
+                            (Animations.recoilAnim);
+
+                        //Play smoke particles
+                        Components.smokeParticles.Play();
+                        //Play bullet tracer particles
+                        Components.bulletTracerParticles.Play();
+
+                        //Play shoot sound
+                        AudioSources.shootSound.Play();
+
+                        //Spawn casing
+                        Instantiate(casingPrefab, casingSpawnPoint.transform.position,
+                           casingSpawnPoint.transform.rotation);
+                        //Muzzleflash
+                        StartCoroutine(Muzzleflash());
+
+                    }
+                    //Increase the minigun rotation speed while holding down left click
+                    minigunRotationSpeed += 1900.0f * Time.deltaTime;
+
+                    //Play spin up sound
+                    if (!spinUpSoundHasPlayed)
+                    {
+
+                        //Set the spin up sound as the current audio clip
+                        AudioSources.minigunSpinUpDownSource.clip
+                            = AudioSources.minigunSpinUpSound;
+
+                        //Play spin up sound
+                        AudioSources.minigunSpinUpDownSource.Play();
+
+                        spinUpSoundHasPlayed = true;
+                        spinDownSoundHasPlayed = false;
+                    }
+                }
+                //Start decreasing the minigun rotation speed when left click is released
+            }
+            else if (minigunRotationSpeed > 0)
+            {
+                minigunRotationSpeed -= 300.0f * Time.deltaTime;
+
+                spinLoopHasPlayed = false;
+
+                //Stop the spin loop sound
+                AudioSources.minigunSpinLoopSound.Stop();
+
+                //Play spin up sound
+                if (!spinDownSoundHasPlayed)
+                {
+
+                    //Set the spin down sound as the current audio clip
+                    AudioSources.minigunSpinUpDownSource.clip
+                        = AudioSources.minigunSpinDownSound;
+
+                    //Play spin up sound
+                    AudioSources.minigunSpinUpDownSource.Play();
+
+                    spinDownSoundHasPlayed = true;
+                    spinUpSoundHasPlayed = false;
+                }
+            }
+            //Set the rotation speed to zero if the rotaiton speed is lower than zero
+            if (minigunRotationSpeed < 0)
+            {
+                minigunRotationSpeed = 0;
+            }
+            //Stop increasing the rotation speed when it has reached 875.0f
+            if (minigunRotationSpeed > 875.0f)
+            {
+                minigunRotationSpeed = 875.0f;
+            }
+            //Allow the minigun to shoot when the rotation speed is higher than 800.0f
+            if (minigunRotationSpeed > 800.0f)
+            {
+                allowMinigunShooting = true;
+
+                if (!spinLoopHasPlayed)
+                {
+                    //Play the spin loop sound
+                    AudioSources.minigunSpinLoopSound.Play();
+
+                    spinLoopHasPlayed = true;
+                }
+
+                //Dont allow shooting when the rotation speed is lower than 750.0f
+            }
+            else if (minigunRotationSpeed < 750.0f)
+            {
+                allowMinigunShooting = false;
+            }
+            //Rotate the barrels depending on the minigun rotation speed
+            Components.barrels.transform.Rotate
+                (Vector3.forward * minigunRotationSpeed * Time.deltaTime);
+
+        }
+
+        //If out of ammo
+        if (bulletsLeft == 0)
+        {
+            outOfAmmo = true;
+        }
+
+        //Disable for machine gun, hand grenade and minigun
+        if (!WeaponType.machineGun && !WeaponType.handGrenade && !WeaponType.minigun)
+        {
+            //Reload when R key is pressed
+            if (reload && bulletsLeft < magazineSize && !isReloading)
+            {
+                StartCoroutine(Reload());
+            }
+        }
+
+        //Play dry fire sound when out of ammo, disable for minigun since it has unlimited ammo
+        if (fire && outOfAmmo == true && !isReloading
+            && !WeaponType.minigun)
+        {
+            //Play dry fire sound if clicking when out of ammo
+            AudioSources.outOfAmmoClickSound.Play();
+        }
+        reload = false;
     }
 }
