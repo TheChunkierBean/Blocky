@@ -1352,7 +1352,7 @@ public class GunScript : NetworkedMonoBehavior	{
 				//********** USED IN THE DEMO SCENES **********
 				//If the raycast hit the tag "Target"
 				if (hit.transform.tag == "Target") {
-					
+                    Debug.Log("Player Hit");
 					//Spawn bullet impact on surface
 					Instantiate (metalImpactPrefab, hit.point, 
 					             Quaternion.FromToRotation (Vector3.forward, hit.normal)); 
