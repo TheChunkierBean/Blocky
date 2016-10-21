@@ -7,7 +7,6 @@ public class GunScript : NetworkedMonoBehavior	{
 	//For the handgun animation
 	bool hasPlayed = false;
 	bool outOfAmmoSlider = false;
-
 	[Header("Bullets Left")]
 	//How many bullets there are left
 	public int bulletsLeft;
@@ -1352,7 +1351,16 @@ public class GunScript : NetworkedMonoBehavior	{
 				//********** USED IN THE DEMO SCENES **********
 				//If the raycast hit the tag "Target"
 				if (hit.transform.tag == "Target") {
-                    Debug.Log("Player Hit");
+                    GameObject val = hit.transform.gameObject;
+                    Debug.Log(val.name);
+                    val.GetComponent<Stats>().Health -= 20;
+                    string health = val.GetComponent<Stats>().Health+"";
+                    Debug.Log("Player Hit: " + health);
+                    if(health == "0")
+                    {
+                        DestroyObject(hit.transform.gameObject);
+                    }
+                  
 					//Spawn bullet impact on surface
 					Instantiate (metalImpactPrefab, hit.point, 
 					             Quaternion.FromToRotation (Vector3.forward, hit.normal)); 
