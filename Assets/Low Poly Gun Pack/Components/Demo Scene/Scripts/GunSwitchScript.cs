@@ -36,12 +36,13 @@ public class GunSwitchScript : NetworkedMonoBehavior {
 	public float tutorialTextFadeOutTime = 4.0f;
 
 	void Start () {
-
-		//Start with the first gun selected
-		currentGunObject = guns[0];
+        totalAmmoText = GameObject.FindObjectsOfType<Text>()[0];
+        ammoLeftText = GameObject.FindObjectsOfType<Text>()[1];
+        //Start with the first gun selected
+        currentGunObject = guns[0];
 		changeGun(0);
 		//Set the current gun text
-		currentGunText.text = gun1Text;
+		//currentGunText.text = gun1Text;
 
 		//Get the ammo values from the first guns script and show as text
 		totalAmmoText.text = guns[0].GetComponent
@@ -64,8 +65,7 @@ public class GunSwitchScript : NetworkedMonoBehavior {
 
 		//Get the ammo left from the current gun
 		//and show it as a text
-		ammoLeftText.text = currentGunObject.GetComponent
-			<GunScript>().bulletsLeft.ToString();
+		ammoLeftText.text = currentGunObject.GetComponent<GunScript>().bulletsLeft.ToString();
 
 		//If key 1 is pressed, and noSwitch is false in GunScript.cs
 		if(Input.GetKeyDown(KeyCode.Alpha1) && 

@@ -1358,14 +1358,14 @@ public class GunScript : NetworkedMonoBehavior	{
                     Debug.Log("Player Hit: " + health);
                     if(health == "0")
                     {
-                        DestroyObject(hit.transform.gameObject);
+                        //DestroyObject(hit.transform.gameObject);
                     }
                   
 					//Spawn bullet impact on surface
 					Instantiate (metalImpactPrefab, hit.point, 
 					             Quaternion.FromToRotation (Vector3.forward, hit.normal)); 
 					//Toggle the isHit bool on the target object
-					hit.transform.gameObject.GetComponent<TargetScript>().isHit = true;
+					//hit.transform.gameObject.GetComponent<TargetScript>().isHit = true;
 				}
 
 				//********** USED IN THE DEMO SCENES **********

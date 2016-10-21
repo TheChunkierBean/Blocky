@@ -76,12 +76,14 @@ public class FirstPersonDrifter: NetworkedMonoBehavior
         if (IsOwner)
         {
             GetComponentInChildren<Camera>().enabled = true;
+            GetComponentInChildren<AudioListener>().enabled = true;
         }
         else
         {
+            GetComponentInChildren<AudioListener>().enabled = false;
             GetComponentInChildren<Camera>().enabled = false;
         }
-        GetComponent<CharacterController>().enabled = true;
+        //GetComponent<CharacterController>().enabled = true;
     }
     void Start()
     {
@@ -188,5 +190,10 @@ public class FirstPersonDrifter: NetworkedMonoBehavior
     void FallingDamageAlert (float fallDistance)
     {
         //print ("Ouch! Fell " + fallDistance + " units!");   
+    }
+    public void Teleport(Vector3 loc)
+    {
+        
+    
     }
 }

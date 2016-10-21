@@ -160,6 +160,7 @@ GameObject:
   - 114: {fileID: 114000012240861746}
   - 114: {fileID: 114000012384005946}
   - 54: {fileID: 54000013634473338}
+  - 114: {fileID: 114000011693146362}
   m_Layer: 0
   m_Name: VanillaPlayer
   m_TagString: Target
@@ -389,7 +390,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1000011809401096}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.2, z: 0}
+  m_LocalPosition: {x: 1.1081725, y: 0.5, z: -0.7112587}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children:
@@ -1311,6 +1312,17 @@ MonoBehaviour:
   zoomFov: 30
   defaultFov: 75
   aimSound: {fileID: 82000011488292416}
+--- !u!114 &114000011693146362
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1000011809401096}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 12304e13573891e4f9d332f615931049, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &114000012240861746
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1581,7 +1593,7 @@ MonoBehaviour:
   currentGunObject: {fileID: 0}
   guns:
   - {fileID: 4000013181431958}
-  gun1Text: 
+  gun1Text: AK - 47
   gun2Text: 
   gun3Text: 
   gun4Text: 

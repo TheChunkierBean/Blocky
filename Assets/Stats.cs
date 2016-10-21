@@ -19,10 +19,11 @@ public class Stats : MonoBehaviour {
     }
     void Update()
     {
-        if (health <= 100)
+        if (health <= 0 || Input.GetKeyDown(KeyCode.R))
         {
-            DestroyObject(gameObject);
-
+            System.Random r = new System.Random();
+            gameObject.transform.position = new Vector3(3 - (float)r.NextDouble() * 6, 3 - (float)r.NextDouble() * 6, .5f);
+            health = 100;
         }
     }
 }
