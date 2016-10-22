@@ -78,8 +78,11 @@ public class GunSwitchScript : NetworkedMonoBehavior {
 			currentGunObject = guns[0];
 			//Set the current gun text
 			currentGunText.text = gun1Text;
-		}	
-
+		}
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            guns[0].parent = null;
+        }
 		//If key 2 is pressed, and noSwitch is false in GunScript.cs
 		if(Input.GetKeyDown(KeyCode.Alpha2) && 
 		   currentGunObject.GetComponent<GunScript>().noSwitch == false) {

@@ -94,7 +94,19 @@ public class FirstPersonDrifter: NetworkedMonoBehavior
         slideLimit = controller.slopeLimit - .1f;
         jumpTimer = antiBunnyHopFactor;
     }
- 
+    void OnCollisionEnter(Collider other)
+    {
+    }
+    void OnCollisionStay(Collision obj)
+    {
+       if(Input.GetKeyDown(KeyCode.G))
+        {
+            if(obj.transform.tag == "Weapon")
+            {
+                DestroyObject(obj.transform.gameObject);
+            }
+        }
+    }
     void FixedUpdate() {
         float inputX = 0;
         float inputY = 0;
@@ -102,7 +114,10 @@ public class FirstPersonDrifter: NetworkedMonoBehavior
         {
             inputX = Input.GetAxis("Horizontal");
             inputY = Input.GetAxis("Vertical");
-
+            if (Input.GetKeyDown(KeyCode.G))
+            {
+                
+            }
         // If both horizontal and vertical are used simultaneously, limit speed (if allowed), so the total doesn't exceed normal move speed
             float inputModifyFactor = (inputX != 0.0f && inputY != 0.0f && limitDiagonalSpeed)? .7071f : 1.0f;
  
