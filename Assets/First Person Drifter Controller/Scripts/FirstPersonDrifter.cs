@@ -109,8 +109,6 @@ public class FirstPersonDrifter: NetworkedMonoBehavior
                 obj.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
                 obj.transform.localRotation = new Quaternion(0f, 0f, 0f, 0f);
                 obj.transform.localPosition = new Vector3(0.36f, -0.19f, 0.48f);
-                
-                
             }
         }
     }

@@ -14,7 +14,7 @@ public class GunScript : NetworkedMonoBehavior	{
 	//Check when reloading and out of ammo
 	bool outOfAmmo = false;
 	bool isReloading = false;
-
+    bool onGround = false;
 	//Used for firerate
 	float lastFired;
 
@@ -125,11 +125,10 @@ public class GunScript : NetworkedMonoBehavior	{
 		public bool minigun;
 	}
 	public weaponType WeaponType;
-
-	//All animations
-	[System.Serializable]
+    //All animations
+    [System.Serializable]
 	public class animations
-	{  
+	{
 		//Animations
 		public string fullMagInAnim;
 		public string recoilAnim;
@@ -391,6 +390,7 @@ public class GunScript : NetworkedMonoBehavior	{
 	}
     private void Awake()
     {
+        AddNetworkVariable(() => transform.position, x => transform.position = (Vector3)x);
         AddNetworkVariable(() => bulletsLeft, x => bulletsLeft = (int)x);
         AddNetworkVariable(() => isReloading, x => isReloading = (bool)x);
         AddNetworkVariable(() => shootLeft, x => shootLeft = (bool)x);
@@ -1745,7 +1745,7 @@ public class GunScript : NetworkedMonoBehavior	{
 
     void Update()
     {
-        if (!IsOwner)
+        if (!IsOwner || onGround)
         {
             return;
         }
@@ -2404,17 +2404,23 @@ public class GunScript : NetworkedMonoBehavior	{
         }
         reload = false;
     }
-    public void DropGun()
+    public void DropGun(Vector3 loc)
     {
-        for(int i = 0; i < GetComponents<AudioListener>().Length; i++)
+        GetComponent<AimScript>().enabled = false;
+        transform.parent = null;
+        //Vector3 x = loc;
+        //x.y += 1f;
+        transform.position = loc;
+        //transform.forward = new Vector3(1f, 1f, 1f);
+        Debug.Log("Last: " + transform.position);
+        for (int i = 0; i < GetComponents<AudioListener>().Length; i++)
         {
             GetComponents<AudioListener>()[i].enabled = false;
         }
-        GetComponent<AimScript>().enabled = false;
-        if (IsOwner)
-            IsOwner = false;
+        
         Transform t = gameObject.GetComponentInChildren<Transform>().Find("Holder");
         t.gameObject.AddComponent<Rigidbody>();
-        
+        onGround = true;
+            ChangeOwner(0);
     }
 }

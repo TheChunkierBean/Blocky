@@ -62,10 +62,9 @@ public class GunSwitchScript : NetworkedMonoBehavior {
         base.NetworkStart();
     }
     void Update () {
-
-		//Get the ammo left from the current gun
-		//and show it as a text
-		ammoLeftText.text = currentGunObject.GetComponent<GunScript>().bulletsLeft.ToString();
+        //Get the ammo left from the current gun
+        //and show it as a text
+        ammoLeftText.text = currentGunObject.GetComponent<GunScript>().bulletsLeft.ToString();
 
 		//If key 1 is pressed, and noSwitch is false in GunScript.cs
 		if(Input.GetKeyDown(KeyCode.Alpha1) && 
@@ -81,8 +80,14 @@ public class GunSwitchScript : NetworkedMonoBehavior {
 		}
         if (Input.GetKeyDown(KeyCode.F))
         {
-            guns[0].parent = null;
-            guns[0].gameObject.GetComponent<GunScript>().DropGun();
+           
+            Debug.Log("Drop Coords: " + transform.parent.position);
+            Physics.IgnoreCollision(guns[0].gameObject.GetComponentInChildren<BoxCollider>(), transform.parent.GetComponent<CharacterController>());
+            if(guns[0]!=null)
+                guns[0].gameObject.GetComponent<GunScript>().DropGun(transform.parent.position);
+            guns[0] = null;
+            
+            
         }
 		//If key 2 is pressed, and noSwitch is false in GunScript.cs
 		if(Input.GetKeyDown(KeyCode.Alpha2) && 
