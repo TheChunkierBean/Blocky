@@ -375,7 +375,7 @@ MonoBehaviour:
   MaxRPCBatch: 10000
   startNetworkedSceneBehaviors: []
   NetworkInstantiates:
-  - {fileID: 1000011809401096, guid: ea4d5bbc764e5474b94ac5159b89146b, type: 2}
+  - {fileID: 1000010547805576, guid: 2a66f57de510bca4b8fda633261c4f17, type: 2}
   resourcesDirectory: 
   frameInterval: 100
   updateTimeInterval: 1
@@ -507,6 +507,17 @@ SphereCollider:
   serializedVersion: 2
   m_Radius: 26.05
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &714324930
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 714324928}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c3df9eb8c6f03e4b87f260f51fe98f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1181556336
 GameObject:
   m_ObjectHideFlags: 0
@@ -609,6 +620,10 @@ Prefab:
       propertyPath: m_RootOrder
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 100006, guid: 16eb65e1a7d800a4cab4d078c3c81675, type: 2}
+      propertyPath: m_TagString
+      value: Weapon
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 16eb65e1a7d800a4cab4d078c3c81675, type: 2}
   m_IsPrefabParent: 0
@@ -639,7 +654,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 134fdd9d0c1fd664ead04c956620a9de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 1000011809401096, guid: ea4d5bbc764e5474b94ac5159b89146b, type: 2}
+  player: {fileID: 1000010547805576, guid: 2a66f57de510bca4b8fda633261c4f17, type: 2}
 --- !u!224 &1330573738
 RectTransform:
   m_ObjectHideFlags: 0
@@ -696,6 +711,10 @@ Prefab:
     - target: {fileID: 400004, guid: c650db418d8046440b1609c5cf5fd7c0, type: 2}
       propertyPath: m_RootOrder
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 100004, guid: c650db418d8046440b1609c5cf5fd7c0, type: 2}
+      propertyPath: m_TagString
+      value: Weapon
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: c650db418d8046440b1609c5cf5fd7c0, type: 2}
@@ -754,6 +773,10 @@ Prefab:
     - target: {fileID: 400006, guid: c2d1109c68e42e448a8567d52e27547a, type: 2}
       propertyPath: m_RootOrder
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 100006, guid: c2d1109c68e42e448a8567d52e27547a, type: 2}
+      propertyPath: m_TagString
+      value: Weapon
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: c2d1109c68e42e448a8567d52e27547a, type: 2}

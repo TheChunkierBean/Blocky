@@ -82,6 +82,7 @@ public class GunSwitchScript : NetworkedMonoBehavior {
         if (Input.GetKeyDown(KeyCode.F))
         {
             guns[0].parent = null;
+            guns[0].gameObject.GetComponent<GunScript>().DropGun();
         }
 		//If key 2 is pressed, and noSwitch is false in GunScript.cs
 		if(Input.GetKeyDown(KeyCode.Alpha2) && 
@@ -152,7 +153,6 @@ public class GunSwitchScript : NetworkedMonoBehavior {
 		//Wait the set amount of time
 		yield return new WaitForSeconds(tutorialTextTimer);
 		//Start fading out the tutorial text
-		tutorialText.CrossFadeAlpha
-			(0.0f, tutorialTextFadeOutTime, false);
+		//tutorialText.CrossFadeAlpha (0.0f, tutorialTextFadeOutTime, false);
 	}
 }

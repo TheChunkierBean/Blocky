@@ -94,18 +94,29 @@ public class FirstPersonDrifter: NetworkedMonoBehavior
         slideLimit = controller.slopeLimit - .1f;
         jumpTimer = antiBunnyHopFactor;
     }
-    void OnCollisionEnter(Collider other)
+    void OnTriggerEnter(Collider obj)
     {
+        Debug.Log("START: " + obj.transform.name);
     }
-    void OnCollisionStay(Collision obj)
+    public Transform mainCamera;
+    void OnTriggerStay(Collider obj)
     {
        if(Input.GetKeyDown(KeyCode.G))
         {
             if(obj.transform.tag == "Weapon")
             {
-                DestroyObject(obj.transform.gameObject);
+                obj.transform.parent = mainCamera.transform;
+                obj.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
+                obj.transform.localRotation = new Quaternion(0f, 0f, 0f, 0f);
+                obj.transform.localPosition = new Vector3(0.36f, -0.19f, 0.48f);
+                
+                
             }
         }
+    }
+    void OnTriggerExit(Collider obj)
+    {
+        Debug.Log("EXIT: " + obj.transform.name);
     }
     void FixedUpdate() {
         float inputX = 0;

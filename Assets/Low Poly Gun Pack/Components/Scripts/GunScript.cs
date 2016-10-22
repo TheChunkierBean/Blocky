@@ -2404,4 +2404,17 @@ public class GunScript : NetworkedMonoBehavior	{
         }
         reload = false;
     }
+    public void DropGun()
+    {
+        for(int i = 0; i < GetComponents<AudioListener>().Length; i++)
+        {
+            GetComponents<AudioListener>()[i].enabled = false;
+        }
+        GetComponent<AimScript>().enabled = false;
+        if (IsOwner)
+            IsOwner = false;
+        Transform t = gameObject.GetComponentInChildren<Transform>().Find("Holder");
+        t.gameObject.AddComponent<Rigidbody>();
+        
+    }
 }
