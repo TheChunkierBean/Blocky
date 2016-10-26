@@ -40,6 +40,7 @@ public class GunSwitchScript : NetworkedMonoBehavior {
         ammoLeftText = GameObject.FindObjectsOfType<Text>()[1];
         //Start with the first gun selected
         currentGunObject = guns[0];
+        currentGunObject.GetComponent<GunScript>().PickUp();
 		changeGun(0);
 		//Set the current gun text
 		//currentGunText.text = gun1Text;
@@ -82,8 +83,7 @@ public class GunSwitchScript : NetworkedMonoBehavior {
         {
            
             Debug.Log("Drop Coords: " + transform.parent.position);
-            Physics.IgnoreCollision(guns[0].gameObject.GetComponentInChildren<BoxCollider>(), transform.parent.GetComponent<CharacterController>());
-            if(guns[0]!=null)
+            if (guns[0]!=null)
                 guns[0].gameObject.GetComponent<GunScript>().DropGun(transform.parent.position);
             guns[0] = null;
             
@@ -152,7 +152,11 @@ public class GunSwitchScript : NetworkedMonoBehavior {
 				guns[i].gameObject.SetActive(false);
 		}
 	}
-
+    public void PickUpGun(Transform gun)
+    {
+        guns[0] = gun;
+        guns[0].gameObject.GetComponent<GunScript>().PickUp();
+    }
 	//Timer for the tutorial text fade 
 	IEnumerator TutorialTextTimer () {
 		//Wait the set amount of time

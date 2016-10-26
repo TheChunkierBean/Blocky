@@ -14,7 +14,7 @@ public class GunScript : NetworkedMonoBehavior	{
 	//Check when reloading and out of ammo
 	bool outOfAmmo = false;
 	bool isReloading = false;
-    bool onGround = false;
+    bool onGround = true;
 	//Used for firerate
 	float lastFired;
 
@@ -318,14 +318,18 @@ public class GunScript : NetworkedMonoBehavior	{
 	//while reloading and shooting
 	public bool noSwitch = false;
 
+    public void PickUp()
+    {
+        onGround = false;
+    }
 	void Start ()
 	{
+        gameObject.tag = "Weapon";
 		//Set the magazine size
 		bulletsLeft = magazineSize;
-
-		//Make sure the light is off
-		//Disable for silenced weapons and hand grenade since they dont need it
-		if (!WeaponType.handgunSilencer && !WeaponType.smgSilencer && !WeaponType.sniperSilencer 
+        //Make sure the light is off
+        //Disable for silenced weapons and hand grenade since they dont need it
+        if (!WeaponType.handgunSilencer && !WeaponType.smgSilencer && !WeaponType.sniperSilencer 
 		    && !WeaponType.assaultRifleSilencer && !WeaponType.assaultRifleSilencer2 && !WeaponType.handGrenade) {
 
 			Components.lightFlash.GetComponent<Light> ().enabled = false;
@@ -387,7 +391,7 @@ public class GunScript : NetworkedMonoBehavior	{
 			Components.bulletHolderAnim.SetActive (false);
 			Components.fullMag.GetComponent<MeshRenderer> ().enabled = false;
 		}
-	}
+    }
     private void Awake()
     {
         AddNetworkVariable(() => transform.position, x => transform.position = (Vector3)x);
@@ -1745,6 +1749,11 @@ public class GunScript : NetworkedMonoBehavior	{
 
     void Update()
     {
+        CharacterController[] cols = GameObject.FindGameObjectWithTag("Player").GetComponents<CharacterController>();
+        foreach (CharacterController c in cols)
+        {
+            Physics.IgnoreCollision(gameObject.GetComponentInChildren<BoxCollider>(), c);
+        }
         if (!IsOwner || onGround)
         {
             return;

@@ -19,7 +19,7 @@ public class Stats : MonoBehaviour {
     }
     void Update()
     {
-        if (health <= 0 || Input.GetKeyDown(KeyCode.R))
+        if (health <= 0 || Input.GetKeyDown(KeyCode.Z))
         {
             System.Random r = new System.Random();
             gameObject.transform.position = new Vector3(3 - (float)r.NextDouble() * 6, 3 - (float)r.NextDouble() * 6, .5f);
