@@ -16,9 +16,9 @@ public class AimScript : MonoBehaviour {
 
 	[Header("Gun Positions")]
 	//Default gun position
-	public Vector3 defaultPosition;
+	public Vector3 defaultPosition = new Vector3(.36f, -.19f, .48f);
 	//Aim down the sight position
-	public Vector3 zoomPosition;
+	public Vector3 zoomPosition = new Vector3(0f, -.2f, .48f);
 
 	[Header("Camera")]
 	//Main gun camera

@@ -155,6 +155,7 @@ public class GunSwitchScript : NetworkedMonoBehavior {
     public void PickUpGun(Transform gun)
     {
         guns[0] = gun;
+        guns[0].gameObject.GetComponent<GunScript>().DropGun(transform.parent.position);
         guns[0].gameObject.GetComponent<GunScript>().PickUp();
     }
 	//Timer for the tutorial text fade 
