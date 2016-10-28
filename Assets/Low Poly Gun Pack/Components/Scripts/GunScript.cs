@@ -320,8 +320,12 @@ public class GunScript : NetworkedMonoBehavior	{
 
     public void PickUp()
     {
-        gameObject.GetComponent<BoxCollider>().enabled = false;
-        gameObject.GetComponent<SphereCollider>().enabled = false;
+        if (gameObject.GetComponent<BoxCollider>() != null)
+            gameObject.GetComponent<BoxCollider>().enabled = false;
+        else gameObject.GetComponentInChildren<BoxCollider>().enabled = false;
+
+        if (gameObject.GetComponent<SphereCollider>() != null)
+            gameObject.GetComponent<SphereCollider>().enabled = false;
         gameObject.GetComponent<AimScript>().defaultPosition = new Vector3(.36f, -.19f, .48f);
         gameObject.GetComponent<AimScript>().zoomPosition = new Vector3(0f, -.2f, .48f);
         gameObject.GetComponent<AimScript>().gunCamera = transform.parent.GetComponent<Camera>();
@@ -2423,10 +2427,8 @@ public class GunScript : NetworkedMonoBehavior	{
     {
         GetComponent<AimScript>().enabled = false;
         transform.parent = null;
-        //Vector3 x = loc;
-        //x.y += 1f;
         transform.position = loc;
-        //transform.forward = new Vector3(1f, 1f, 1f);
+        transform.forward = new Vector3(1f, 1f, 1f);
         Debug.Log("Last: " + transform.position);
         for (int i = 0; i < GetComponents<AudioListener>().Length; i++)
         {
@@ -2434,6 +2436,7 @@ public class GunScript : NetworkedMonoBehavior	{
         }
         
         Transform t = gameObject.GetComponentInChildren<Transform>().Find("Holder");
+        t.GetComponent<BoxCollider>().enabled = true;
         t.gameObject.AddComponent<Rigidbody>();
         onGround = true;
             ChangeOwner(0);
