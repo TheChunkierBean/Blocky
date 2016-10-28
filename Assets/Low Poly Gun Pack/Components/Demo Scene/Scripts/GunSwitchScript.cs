@@ -81,13 +81,8 @@ public class GunSwitchScript : NetworkedMonoBehavior {
 		}
         if (Input.GetKeyDown(KeyCode.F))
         {
-           
-            Debug.Log("Drop Coords: " + transform.parent.position);
-            if (guns[0]!=null)
-                guns[0].gameObject.GetComponent<GunScript>().DropGun(transform.parent.position);
-            guns[0] = null;
-            
-            
+
+            DropGun();
         }
 		//If key 2 is pressed, and noSwitch is false in GunScript.cs
 		if(Input.GetKeyDown(KeyCode.Alpha2) && 
@@ -152,10 +147,16 @@ public class GunSwitchScript : NetworkedMonoBehavior {
 				guns[i].gameObject.SetActive(false);
 		}
 	}
+    public void DropGun()
+    {
+        if (guns[0] != null)
+            guns[0].gameObject.GetComponent<GunScript>().DropGun(transform.parent.position);
+        guns[0] = null;
+    }
     public void PickUpGun(Transform gun)
     {
+        DropGun();
         guns[0] = gun;
-        guns[0].gameObject.GetComponent<GunScript>().DropGun(transform.parent.position);
         guns[0].gameObject.GetComponent<GunScript>().PickUp();
     }
 	//Timer for the tutorial text fade 

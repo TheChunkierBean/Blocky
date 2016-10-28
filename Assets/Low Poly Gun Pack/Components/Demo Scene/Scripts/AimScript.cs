@@ -14,11 +14,11 @@ public class AimScript : MonoBehaviour {
 	//How fast the gun moves to the new position
 	public float moveSpeed = 15.0f;
 
-	[Header("Gun Positions")]
-	//Default gun position
-	public Vector3 defaultPosition = new Vector3(.36f, -.19f, .48f);
-	//Aim down the sight position
-	public Vector3 zoomPosition = new Vector3(0f, -.2f, .48f);
+    [Header("Gun Positions")]
+    //Default gun position
+    public Vector3 defaultPosition;
+    //Aim down the sight position
+    public Vector3 zoomPosition;
 
 	[Header("Camera")]
 	//Main gun camera
@@ -41,7 +41,7 @@ public class AimScript : MonoBehaviour {
 
 		//Hide the cursor at start
 		Cursor.visible = false;
-	}
+    }
 
 	void Update () {
 

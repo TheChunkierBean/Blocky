@@ -320,6 +320,12 @@ public class GunScript : NetworkedMonoBehavior	{
 
     public void PickUp()
     {
+        gameObject.GetComponent<BoxCollider>().enabled = false;
+        gameObject.GetComponent<SphereCollider>().enabled = false;
+        gameObject.GetComponent<AimScript>().defaultPosition = new Vector3(.36f, -.19f, .48f);
+        gameObject.GetComponent<AimScript>().zoomPosition = new Vector3(0f, -.2f, .48f);
+        gameObject.GetComponent<AimScript>().gunCamera = transform.parent.GetComponent<Camera>();
+        gameObject.GetComponent<AimScript>().enabled = true;
         onGround = false;
     }
 	void Start ()
