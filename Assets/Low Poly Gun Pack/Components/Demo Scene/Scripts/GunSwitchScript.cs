@@ -158,13 +158,16 @@ public class GunSwitchScript : NetworkedMonoBehavior {
         DropGun();
         if (gun.name == "Holder")
         {
+            gun.localPosition = new Vector3(0f, 0f, 0f);
+            gun.localRotation = new Quaternion(0f, 0f, 0f, 0f);
+            gun.parent.parent = mainCamera.transform;
             guns[0] = gun.parent;
-            gun.transform.position = new Vector3(0f, 0f, 0f);
-            gun.transform.rotation = new Quaternion(0f, 0f, 0f, 0f);
-
-        }else
-        guns[0] = gun;
-        guns[0].parent = mainCamera.transform;
+        }
+        else
+        {
+            guns[0] = gun;
+            gun.parent = mainCamera.transform;
+        }
         guns[0].localScale = new Vector3(0.05f, 0.05f, 0.05f);
         guns[0].localRotation = new Quaternion(0f, 0f, 0f, 0f);
         guns[0].localPosition = new Vector3(0.36f, -0.19f, 0.48f);
