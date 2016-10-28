@@ -68,7 +68,7 @@ GameObject:
   - 114: {fileID: 114000013191004138}
   m_Layer: 0
   m_Name: Assault Rifle
-  m_TagString: Untagged
+  m_TagString: Weapon
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -180,9 +180,10 @@ GameObject:
   - 4: {fileID: 4000014142767376}
   - 111: {fileID: 111000012236784160}
   - 65: {fileID: 65000010336615966}
+  - 135: {fileID: 135000010932062834}
   m_Layer: 0
   m_Name: Holder
-  m_TagString: Untagged
+  m_TagString: Weapon
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -391,7 +392,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1000010547805576}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.7438185, y: 0.5, z: -1.0853474}
+  m_LocalPosition: {x: -2.9519806, y: 0.5, z: -2.9740045}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children:
@@ -1695,6 +1696,18 @@ Behaviour:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1000012857617732}
   m_Enabled: 1
+--- !u!135 &135000010932062834
+SphereCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1000011751552148}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 25.93
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!143 &143000013583693326
 CharacterController:
   m_ObjectHideFlags: 1

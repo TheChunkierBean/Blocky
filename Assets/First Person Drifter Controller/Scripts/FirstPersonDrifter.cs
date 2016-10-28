@@ -105,11 +105,7 @@ public class FirstPersonDrifter: NetworkedMonoBehavior
         {
             if (obj.transform.tag == "Weapon")
             {
-                obj.transform.parent = mainCamera.transform;
-                obj.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
-                obj.transform.localRotation = new Quaternion(0f, 0f, 0f, 0f);
-                obj.transform.localPosition = new Vector3(0.36f, -0.19f, 0.48f);
-                gameObject.GetComponentInChildren<GunSwitchScript>().PickUpGun(obj.transform);
+                gameObject.GetComponentInChildren<GunSwitchScript>().PickUpGun(obj.transform, mainCamera);
             }
         }
     }

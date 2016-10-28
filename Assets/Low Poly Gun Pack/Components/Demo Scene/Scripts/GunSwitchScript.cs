@@ -153,10 +153,21 @@ public class GunSwitchScript : NetworkedMonoBehavior {
             guns[0].gameObject.GetComponent<GunScript>().DropGun(transform.parent.position);
         guns[0] = null;
     }
-    public void PickUpGun(Transform gun)
+    public void PickUpGun(Transform gun, Transform mainCamera)
     {
         DropGun();
+        if (gun.name == "Holder")
+        {
+            guns[0] = gun.parent;
+            gun.transform.position = new Vector3(0f, 0f, 0f);
+            gun.transform.rotation = new Quaternion(0f, 0f, 0f, 0f);
+
+        }else
         guns[0] = gun;
+        guns[0].parent = mainCamera.transform;
+        guns[0].localScale = new Vector3(0.05f, 0.05f, 0.05f);
+        guns[0].localRotation = new Quaternion(0f, 0f, 0f, 0f);
+        guns[0].localPosition = new Vector3(0.36f, -0.19f, 0.48f);
         guns[0].gameObject.GetComponent<GunScript>().PickUp();
     }
 	//Timer for the tutorial text fade 

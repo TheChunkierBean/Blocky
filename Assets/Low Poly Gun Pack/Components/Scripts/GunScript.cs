@@ -321,9 +321,16 @@ public class GunScript : NetworkedMonoBehavior	{
     public void PickUp()
     {
         if (gameObject.GetComponent<BoxCollider>() != null)
+        {
             gameObject.GetComponent<BoxCollider>().enabled = false;
-        else gameObject.GetComponentInChildren<BoxCollider>().enabled = false;
-
+            Destroy(gameObject.GetComponent<Rigidbody>());
+        }
+        else
+        {
+            gameObject.GetComponentInChildren<BoxCollider>().enabled = false;
+            Destroy(gameObject.GetComponentInChildren<Rigidbody>());
+        }
+        gameObject.transform.position = new Vector3(.36f, -.19f, .48f);
         if (gameObject.GetComponent<SphereCollider>() != null)
             gameObject.GetComponent<SphereCollider>().enabled = false;
         gameObject.GetComponent<AimScript>().defaultPosition = new Vector3(.36f, -.19f, .48f);
@@ -1759,10 +1766,13 @@ public class GunScript : NetworkedMonoBehavior	{
 
     void Update()
     {
-        CharacterController[] cols = GameObject.FindGameObjectWithTag("Player").GetComponents<CharacterController>();
-        foreach (CharacterController c in cols)
+        if (!onGround)
         {
-            Physics.IgnoreCollision(gameObject.GetComponentInChildren<BoxCollider>(), c);
+            CharacterController[] cols = GameObject.FindGameObjectWithTag("Player").GetComponents<CharacterController>();
+            foreach (CharacterController c in cols)
+            {
+                Physics.IgnoreCollision(gameObject.GetComponentInChildren<BoxCollider>(), c);
+            }
         }
         if (!IsOwner || onGround)
         {
@@ -2425,6 +2435,8 @@ public class GunScript : NetworkedMonoBehavior	{
     }
     public void DropGun(Vector3 loc)
     {
+
+        onGround = true;
         GetComponent<AimScript>().enabled = false;
         transform.parent = null;
         transform.position = loc;
@@ -2434,10 +2446,15 @@ public class GunScript : NetworkedMonoBehavior	{
         {
             GetComponents<AudioListener>()[i].enabled = false;
         }
-        
-        Transform t = gameObject.GetComponentInChildren<Transform>().Find("Holder");
+
+        Transform t;
+        if (gameObject.GetComponent<BoxCollider>() != null)
+            t = transform;
+        else
+            t = gameObject.GetComponentInChildren<Transform>().Find("Holder");
         t.GetComponent<BoxCollider>().enabled = true;
         t.gameObject.AddComponent<Rigidbody>();
+        t.GetComponent<SphereCollider>().enabled = true;
         onGround = true;
             ChangeOwner(0);
     }
