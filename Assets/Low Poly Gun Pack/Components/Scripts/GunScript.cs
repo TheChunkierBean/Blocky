@@ -64,6 +64,7 @@ public class GunScript : NetworkedMonoBehavior	{
 	[Header("Customizable Options")]
 	public int
 		magazineSize;
+    public int totalAmmo;
 	public float muzzleFlashDuration = 0.02f;
 	public float fireRate;
 	public float reloadDuration = 1.5f;
@@ -76,7 +77,7 @@ public class GunScript : NetworkedMonoBehavior	{
 
 	public float bulletDistance = 150f;
 	public float bulletForce = 15f;
-
+    public bool hasAmmo = true;
 	[Header("Hand Grenade Options")]
 	//How much force will be applied to the grenade
 	public float grenadeThrowForce = 2500.0f;
@@ -720,9 +721,17 @@ public class GunScript : NetworkedMonoBehavior	{
 
 		//Wait for set amount of time
 		yield return new WaitForSeconds (reloadDuration);
-		
-		//Refill bullets
-		bulletsLeft = magazineSize;
+
+        //Refill bullets
+        if (totalAmmo > magazineSize)
+        {
+            bulletsLeft = magazineSize;
+            totalAmmo -= magazineSize;
+        }else
+        {
+            bulletsLeft = totalAmmo;
+            totalAmmo = 0;
+        }
 
 		//Disable for sniper, shotgun, sawn off shotgun and rpg since they dont have a mag
 		if (WeaponType.handgun == true || WeaponType.dualHandguns == true || WeaponType.smg == true || WeaponType.assaultRifle == true || 
@@ -1766,6 +1775,8 @@ public class GunScript : NetworkedMonoBehavior	{
 
     void Update()
     {
+        if (totalAmmo == 0)
+            hasAmmo = false;
         if (!onGround)
         {
             CharacterController[] cols = GameObject.FindGameObjectWithTag("Player").GetComponents<CharacterController>();
@@ -2065,13 +2076,13 @@ public class GunScript : NetworkedMonoBehavior	{
             }
 
             //Reload when R key is pressed, if reloaded when ammo is at 
-            if (reload && bulletsLeft == 0 && !isReloading)
+            if (reload && bulletsLeft == 0 && !isReloading && hasAmmo)
             {
                 StartCoroutine(Reload());
             }
 
             //Reload when R key is pressed, if reloaded when ammo is higher than 0
-            if (reload && bulletsLeft > 0 && bulletsLeft < magazineSize && !isReloading)
+            if (reload && bulletsLeft > 0 && bulletsLeft < magazineSize && !isReloading && hasAmmo)
             {
                 StartCoroutine(ReloadMachineGun());
             }
@@ -2418,7 +2429,7 @@ public class GunScript : NetworkedMonoBehavior	{
         if (!WeaponType.machineGun && !WeaponType.handGrenade && !WeaponType.minigun)
         {
             //Reload when R key is pressed
-            if (reload && bulletsLeft < magazineSize && !isReloading)
+            if (reload && bulletsLeft < magazineSize && !isReloading && hasAmmo)
             {
                 StartCoroutine(Reload());
             }

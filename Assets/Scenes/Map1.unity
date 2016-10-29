@@ -832,6 +832,14 @@ Prefab:
       propertyPath: reverbZoneMixCustomCurve.m_RotationOrder
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 8363dc938197a3b46ace0aa646f17403, type: 2}
+      propertyPath: sceneNetworkedId
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 8363dc938197a3b46ace0aa646f17403, type: 2}
+      propertyPath: totalAmmo
+      value: 8
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 8363dc938197a3b46ace0aa646f17403, type: 2}
   m_IsPrefabParent: 0

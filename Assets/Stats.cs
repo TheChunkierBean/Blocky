@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class Stats : MonoBehaviour {
+    public Text hpText;
     private int health= 100;
     public int Health
     {
@@ -17,8 +19,14 @@ public class Stats : MonoBehaviour {
             }
         }
     }
+    void Start()
+    {
+        hpText = GameObject.Find("HP Text").GetComponent<Text>();
+    }
     void Update()
     {
+
+        hpText.text = health+"";
         if (health <= 0 || Input.GetKeyDown(KeyCode.Z))
         {
             System.Random r = new System.Random();

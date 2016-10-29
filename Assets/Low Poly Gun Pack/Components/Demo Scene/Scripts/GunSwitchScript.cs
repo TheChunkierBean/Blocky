@@ -65,8 +65,17 @@ public class GunSwitchScript : NetworkedMonoBehavior {
     void Update () {
         //Get the ammo left from the current gun
         //and show it as a text
-        ammoLeftText.text = currentGunObject.GetComponent<GunScript>().bulletsLeft.ToString();
-
+        if (GetComponentInChildren<GunScript>() != null)
+        {
+            ammoLeftText.text = GetComponentInChildren<GunScript>().bulletsLeft.ToString();
+            totalAmmoText.text = GetComponentInChildren<GunScript>().totalAmmo.ToString();
+        }
+        else
+        {
+            ammoLeftText.text = "0";
+            totalAmmoText.text = "0";
+        }
+        
 		//If key 1 is pressed, and noSwitch is false in GunScript.cs
 		if(Input.GetKeyDown(KeyCode.Alpha1) && 
 		   currentGunObject.GetComponent<GunScript>().noSwitch == false) {
