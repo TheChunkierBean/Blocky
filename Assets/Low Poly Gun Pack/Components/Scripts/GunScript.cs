@@ -726,7 +726,7 @@ public class GunScript : NetworkedMonoBehavior	{
         if (totalAmmo > magazineSize)
         {
             bulletsLeft = magazineSize;
-            totalAmmo -= magazineSize;
+            totalAmmo -= (magazineSize-bulletsLeft);
         }else
         {
             bulletsLeft = totalAmmo;
