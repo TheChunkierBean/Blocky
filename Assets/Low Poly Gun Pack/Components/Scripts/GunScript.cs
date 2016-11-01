@@ -426,10 +426,21 @@ public class GunScript : NetworkedMonoBehavior	{
     //Reload
     IEnumerator Reload ()
 	{
-
-		//********** USED IN THE DEMO SCENES **********
-		//Prevent gun switching while reloading
-		noSwitch = true;
+        //Refill bullets
+        if (totalAmmo >= magazineSize)
+        {
+            Debug.Log("B: " + bulletsLeft + ", M: " + magazineSize);
+            totalAmmo -= (magazineSize - bulletsLeft);
+            bulletsLeft = magazineSize;
+        }
+        else
+        {
+            bulletsLeft = totalAmmo;
+            totalAmmo = 0;
+        }
+        //********** USED IN THE DEMO SCENES **********
+        //Prevent gun switching while reloading
+        noSwitch = true;
 		
 		//Start reloading
 		isReloading = true;
@@ -722,16 +733,7 @@ public class GunScript : NetworkedMonoBehavior	{
 		//Wait for set amount of time
 		yield return new WaitForSeconds (reloadDuration);
 
-        //Refill bullets
-        if (totalAmmo > magazineSize)
-        {
-            bulletsLeft = magazineSize;
-            totalAmmo -= (magazineSize-bulletsLeft);
-        }else
-        {
-            bulletsLeft = totalAmmo;
-            totalAmmo = 0;
-        }
+
 
 		//Disable for sniper, shotgun, sawn off shotgun and rpg since they dont have a mag
 		if (WeaponType.handgun == true || WeaponType.dualHandguns == true || WeaponType.smg == true || WeaponType.assaultRifle == true || 

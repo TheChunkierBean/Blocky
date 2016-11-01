@@ -44,7 +44,7 @@ namespace BeardedManStudios.Forge.Examples
 
 		private NetWorker socket = null;                                                                        // The initial connection socket
 
-		public InputField ipAddressInput = null;                                                                // The input label for the ip address for the client to connect to directly
+        public InputField ipAddressInput = null;                                                             // The input label for the ip address for the client to connect to directly
 
 		/// <summary>
 		/// The percentage change each packet will be dropped in the Network simulation.
@@ -101,8 +101,9 @@ namespace BeardedManStudios.Forge.Examples
 
 		public void Start()
 		{
-			// Assign the text for the input to be whatever is set by default
-			ipAddressInput.text = host;
+            ipAddressInput = GameObject.Find("IPAddressInput").GetComponent<InputField>();
+;            // Assign the text for the input to be whatever is set by default
+            ipAddressInput.text = host;
 
 			// These devices have no reason to fire off a firewall check as they are not behind a local firewall
 #if !UNITY_IPHONE && !UNITY_WP_8_1 && !UNITY_ANDROID
