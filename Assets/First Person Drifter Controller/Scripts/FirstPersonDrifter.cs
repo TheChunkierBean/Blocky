@@ -48,6 +48,7 @@ public class FirstPersonDrifter: NetworkedMonoBehavior
     private RaycastHit hit;
     private float fallStartLevel;
     private bool falling;
+    public Animator animator;
     private float slideLimit;
     private float rayDistance;
     private Vector3 contactPoint;
@@ -120,11 +121,17 @@ public class FirstPersonDrifter: NetworkedMonoBehavior
         {
             inputX = Input.GetAxis("Horizontal");
             inputY = Input.GetAxis("Vertical");
-            if (Input.GetKeyDown(KeyCode.G))
-            {
-                
-            }
-        // If both horizontal and vertical are used simultaneously, limit speed (if allowed), so the total doesn't exceed normal move speed
+
+            animator.SetFloat("MoveSpeed", inputY);
+
+            int angle = (int)Mathf.Round((Mathf.Atan(inputY / inputX) * (180 / Mathf.PI)));
+            if (inputX < 0)
+                angle = 180 + angle;
+            if (angle < 0)
+                angle = 360 + angle;
+            Debug.Log(inputX +", " + inputY +", " + angle);
+            animator.SetFloat("MoveDirection", inputY);
+            // If both horizontal and vertical are used simultaneously, limit speed (if allowed), so the total doesn't exceed normal move speed
             float inputModifyFactor = (inputX != 0.0f && inputY != 0.0f && limitDiagonalSpeed)? .7071f : 1.0f;
  
             if (grounded) {
@@ -169,11 +176,16 @@ public class FirstPersonDrifter: NetworkedMonoBehavior
                     moveDirection = myTransform.TransformDirection(moveDirection) * speed;
                     playerControl = true;
                 }
- 
+
                 // Jump! But only if the jump button has been released and player has been grounded for a given number of frames
                 if (!Input.GetButton("Jump"))
+                {
                     jumpTimer++;
-                else if (jumpTimer >= antiBunnyHopFactor) {
+
+                }
+                else if (jumpTimer >= antiBunnyHopFactor)
+                {
+                    animator.SetBool("Jump", true);
                     moveDirection.y = jumpSpeed;
                     jumpTimer = 0;
                 }
