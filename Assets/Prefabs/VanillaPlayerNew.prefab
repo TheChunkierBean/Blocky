@@ -868,7 +868,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1000012685875706}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.8109709, y: 0.5, z: 0.6104565}
+  m_LocalPosition: {x: 2.5263777, y: 0.5, z: -2.2532396}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children:
@@ -2315,6 +2315,7 @@ MonoBehaviour:
   airControl: 1
   antiBumpFactor: 0.75
   antiBunnyHopFactor: 1
+  animator: {fileID: 0}
   mainCamera: {fileID: 4000012496203126}
 --- !u!114 &114000011544866168
 MonoBehaviour:
