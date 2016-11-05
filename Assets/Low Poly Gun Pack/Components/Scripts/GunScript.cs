@@ -49,7 +49,7 @@ public class GunScript : NetworkedMonoBehavior	{
 	[Header("Dirt")]
 	public Transform dirtImpactStaticPrefab;
 	public Transform dirtImpactPrefab;
-
+    private Vector3 position;
 	[Header("Impact Tags")]
 	//Default tags for bullet impacts
 	public string metalImpactStaticTag = "Metal (Static)";
@@ -412,7 +412,7 @@ public class GunScript : NetworkedMonoBehavior	{
     }
     private void Awake()
     {
-        AddNetworkVariable(() => transform.position, x => transform.position = (Vector3)x);
+        AddNetworkVariable(() => position, x => position = (Vector3)x);
         AddNetworkVariable(() => bulletsLeft, x => bulletsLeft = (int)x);
         AddNetworkVariable(() => isReloading, x => isReloading = (bool)x);
         AddNetworkVariable(() => shootLeft, x => shootLeft = (bool)x);
@@ -1797,6 +1797,7 @@ public class GunScript : NetworkedMonoBehavior	{
         }
         if (Input.GetKeyDown(KeyCode.R))
             RPC("Fire", true, false);
+        position = transform.position;
         
     }
     [BRPC]
