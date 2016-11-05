@@ -55,13 +55,12 @@ public class FirstPersonDrifter: NetworkedMonoBehavior
     private bool playerControl = false;
     private int jumpTimer;
     private float inputX = 0;
-    private float angle = 90;
+    private int angle = 90;
     private float inputY = 0;
     private Vector3 move;
     private bool jump;
     private void Awake()
     {
-        AddNetworkVariable(() => move, x => move = (Vector3)x);
         AddNetworkVariable(() => moveDirection, x => moveDirection = (Vector3)x);
         AddNetworkVariable(() => grounded, x => grounded = (bool)x);
         AddNetworkVariable(() => speed, x => speed = (float)x);
@@ -69,7 +68,7 @@ public class FirstPersonDrifter: NetworkedMonoBehavior
         AddNetworkVariable(() => falling, x => falling = (bool)x);
         AddNetworkVariable(() => slideLimit, x => slideLimit = (float)x);
         AddNetworkVariable(() => rayDistance, x => rayDistance = (float)x);
-        AddNetworkVariable(() => angle, x => angle = (float)x);
+        AddNetworkVariable(() => angle, x => angle = (int)x);
         AddNetworkVariable(() => inputX, x => inputX = (float)x);
         AddNetworkVariable(() => inputY, x => inputY = (float)x);
         AddNetworkVariable(() => jump, x => jump = (bool)x);
@@ -139,8 +138,8 @@ public class FirstPersonDrifter: NetworkedMonoBehavior
         {
             inputX = Input.GetAxis("Horizontal");
             inputY = Input.GetAxis("Vertical");
-
-            int angle = (int)Mathf.Round((Mathf.Atan(inputY / inputX) * (180 / Mathf.PI)));
+        }
+            angle = (int)Mathf.Round((Mathf.Atan(inputY / inputX) * (180 / Mathf.PI)));
             if (inputX < 0)
                 angle = 180 + angle;
             if (angle < 0)
@@ -193,17 +192,6 @@ public class FirstPersonDrifter: NetworkedMonoBehavior
                 }
 
                 // Jump! But only if the jump button has been released and player has been grounded for a given number of frames
-                if (!Input.GetButton("Jump"))
-                {
-                    jumpTimer++;
-
-                }
-                else if (jumpTimer >= antiBunnyHopFactor)
-                {
-                    jump = true;
-                    moveDirection.y = jumpSpeed;
-                    jumpTimer = 0;
-                }
             }
             else {
                 // If we stepped over a cliff or something, set the height at which we started falling
@@ -219,13 +207,23 @@ public class FirstPersonDrifter: NetworkedMonoBehavior
                     moveDirection = myTransform.TransformDirection(moveDirection);
                 }
             }
-
-    // Apply gravity
-    moveDirection.y -= gravity * Time.deltaTime;
-            move = transform.position;
+            if(IsOwner)
+            {
+                if (!Input.GetButton("Jump"))
+                {
+                    jumpTimer++;
+                }
+                else if (jumpTimer >= antiBunnyHopFactor)
+                {
+                    jump = true;
+                    moveDirection.y = jumpSpeed;
+                    jumpTimer = 0;
+                }
+            }
+            // Apply gravity
+            moveDirection.y -= gravity * Time.deltaTime;
             // Move the controller, and set grounded true or false depending on whether we're standing on something
             grounded = (controller.Move(moveDirection * Time.deltaTime) & CollisionFlags.Below) != 0;
-        }
     }
  
     // Store point that we're in contact with for use in FixedUpdate if needed
