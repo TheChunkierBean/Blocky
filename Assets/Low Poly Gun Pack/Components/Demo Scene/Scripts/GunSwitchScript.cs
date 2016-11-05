@@ -36,20 +36,12 @@ public class GunSwitchScript : NetworkedMonoBehavior {
 	public float tutorialTextFadeOutTime = 4.0f;
 
 	void Start () {
-        totalAmmoText = GameObject.FindObjectsOfType<Text>()[0];
-        ammoLeftText = GameObject.FindObjectsOfType<Text>()[1];
         //Start with the first gun selected
-        currentGunObject = guns[0];
-        currentGunObject.GetComponent<GunScript>().PickUp();
-		changeGun(0);
+
 		//Set the current gun text
 		//currentGunText.text = gun1Text;
 
 		//Get the ammo values from the first guns script and show as text
-		totalAmmoText.text = guns[0].GetComponent
-			<GunScript>().magazineSize.ToString();
-		ammoLeftText.text = guns[0].GetComponent
-			<GunScript>().bulletsLeft.ToString();
 
 		//Start the tutorial text timer
 		StartCoroutine (TutorialTextTimer ());
@@ -61,21 +53,35 @@ public class GunSwitchScript : NetworkedMonoBehavior {
     protected override void NetworkStart()
     {
         base.NetworkStart();
+        if (IsOwner)
+        {
+            totalAmmoText = GameObject.FindObjectsOfType<Text>()[0];
+            ammoLeftText = GameObject.FindObjectsOfType<Text>()[1];
+            currentGunObject = guns[0];
+            currentGunObject.GetComponent<GunScript>().PickUp();
+            changeGun(0);
+            totalAmmoText.text = guns[0].GetComponent
+    <GunScript>().magazineSize.ToString();
+            ammoLeftText.text = guns[0].GetComponent
+                <GunScript>().bulletsLeft.ToString();
+        }
     }
     void Update () {
         //Get the ammo left from the current gun
         //and show it as a text
-        if (GetComponentInChildren<GunScript>() != null)
+        if (IsOwner)
         {
-            ammoLeftText.text = GetComponentInChildren<GunScript>().bulletsLeft.ToString();
-            totalAmmoText.text = GetComponentInChildren<GunScript>().totalAmmo.ToString();
+            if (GetComponentInChildren<GunScript>() != null)
+            {
+                ammoLeftText.text = GetComponentInChildren<GunScript>().bulletsLeft.ToString();
+                totalAmmoText.text = GetComponentInChildren<GunScript>().totalAmmo.ToString();
+            }
+            else
+            {
+                ammoLeftText.text = "0";
+                totalAmmoText.text = "0";
+            }
         }
-        else
-        {
-            ammoLeftText.text = "0";
-            totalAmmoText.text = "0";
-        }
-        
 		//If key 1 is pressed, and noSwitch is false in GunScript.cs
 		if(Input.GetKeyDown(KeyCode.Alpha1) && 
 		   currentGunObject.GetComponent<GunScript>().noSwitch == false) {

@@ -38,7 +38,7 @@ public class FirstPersonDrifter: NetworkedMonoBehavior
     public float antiBumpFactor = .75f;
  
     // Player must be grounded for at least this many physics frames before being able to jump again; set to 0 to allow bunny hopping
-    public int antiBunnyHopFactor = 1;
+    public int antiBunnyHopFactor = 10;
  
     private Vector3 moveDirection = Vector3.zero;
     private bool grounded = false;
@@ -63,18 +63,12 @@ public class FirstPersonDrifter: NetworkedMonoBehavior
     {
         AddNetworkVariable(() => moveDirection, x => moveDirection = (Vector3)x);
         AddNetworkVariable(() => grounded, x => grounded = (bool)x);
-        AddNetworkVariable(() => speed, x => speed = (float)x);
-        AddNetworkVariable(() => fallStartLevel, x => fallStartLevel = (float)x);
-        AddNetworkVariable(() => falling, x => falling = (bool)x);
-        AddNetworkVariable(() => slideLimit, x => slideLimit = (float)x);
-        AddNetworkVariable(() => rayDistance, x => rayDistance = (float)x);
         AddNetworkVariable(() => angle, x => angle = (int)x);
         AddNetworkVariable(() => inputX, x => inputX = (float)x);
         AddNetworkVariable(() => inputY, x => inputY = (float)x);
         AddNetworkVariable(() => jump, x => jump = (bool)x);
         AddNetworkVariable(() => contactPoint, x => contactPoint = (Vector3)x);
         AddNetworkVariable(() => playerControl, x => playerControl = (bool)x);
-        AddNetworkVariable(() => jumpTimer, x => jumpTimer = (int)x);
     }
     protected override void NetworkStart()
     {
@@ -170,8 +164,8 @@ public class FirstPersonDrifter: NetworkedMonoBehavior
                     if (myTransform.position.y < fallStartLevel - fallingDamageThreshold)
                         FallingDamageAlert (fallStartLevel - myTransform.position.y);
                 }
- 
-                if( enableRunning )
+                    
+                if( enableRunning && IsOwner)
                 {
             	    speed = Input.GetButton("Run")? runSpeed : walkSpeed;
                 }
@@ -191,8 +185,24 @@ public class FirstPersonDrifter: NetworkedMonoBehavior
                     playerControl = true;
                 }
 
-                // Jump! But only if the jump button has been released and player has been grounded for a given number of frames
+            // Jump! But only if the jump button has been released and player has been grounded for a given number of frames
+            bool jumpCheck = false;
+            if (IsOwner)
+            {
+                jumpCheck = Input.GetButton("Jump");
             }
+            if (!jumpCheck)
+            {
+                jump = false;
+                jumpTimer++;
+            }
+            else if (jumpTimer >= antiBunnyHopFactor)
+            {
+                jump = true;
+                moveDirection.y = jumpSpeed;
+                jumpTimer = 0;
+            }
+        }
             else {
                 // If we stepped over a cliff or something, set the height at which we started falling
                 if (!falling) {
@@ -207,19 +217,8 @@ public class FirstPersonDrifter: NetworkedMonoBehavior
                     moveDirection = myTransform.TransformDirection(moveDirection);
                 }
             }
-            if(IsOwner)
-            {
-                if (!Input.GetButton("Jump"))
-                {
-                    jumpTimer++;
-                }
-                else if (jumpTimer >= antiBunnyHopFactor)
-                {
-                    jump = true;
-                    moveDirection.y = jumpSpeed;
-                    jumpTimer = 0;
-                }
-            }
+            
+            
             // Apply gravity
             moveDirection.y -= gravity * Time.deltaTime;
             // Move the controller, and set grounded true or false depending on whether we're standing on something
