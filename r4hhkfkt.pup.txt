@@ -1,0 +1,16 @@
+﻿Revert "Merge remote-tracking branch 'origin/master'"
+
+This reverts commit d157345aec83e11664d4497c27cfd699fc8006f8, reversing
+changes made to 0bb498165f6122687f2d1a80f8fadf811d7e1def.
+
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+# On branch master
+# Your branch is up-to-date with 'origin/master'.
+#
+# Changes to be committed:
+#	modified:   Assets/Character Model/Animations/MainCharacter.controller
+#	modified:   Assets/Character Model/Animations/run_backward.fbx.meta
+#	modified:   Assets/Prefabs/VanillaPlayerNew.prefab
+#
+
