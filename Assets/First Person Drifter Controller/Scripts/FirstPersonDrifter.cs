@@ -54,7 +54,11 @@ public class FirstPersonDrifter: NetworkedMonoBehavior
     private Vector3 contactPoint;
     private bool playerControl = false;
     private int jumpTimer;
+    private float inputX = 0;
+    private float angle = 90;
+    private float inputY = 0;
     private Vector3 move;
+    private bool jump;
     private void Awake()
     {
         AddNetworkVariable(() => move, x => move = (Vector3)x);
@@ -65,7 +69,10 @@ public class FirstPersonDrifter: NetworkedMonoBehavior
         AddNetworkVariable(() => falling, x => falling = (bool)x);
         AddNetworkVariable(() => slideLimit, x => slideLimit = (float)x);
         AddNetworkVariable(() => rayDistance, x => rayDistance = (float)x);
-
+        AddNetworkVariable(() => angle, x => angle = (float)x);
+        AddNetworkVariable(() => inputX, x => inputX = (float)x);
+        AddNetworkVariable(() => inputY, x => inputY = (float)x);
+        AddNetworkVariable(() => jump, x => jump = (bool)x);
         AddNetworkVariable(() => contactPoint, x => contactPoint = (Vector3)x);
         AddNetworkVariable(() => playerControl, x => playerControl = (bool)x);
         AddNetworkVariable(() => jumpTimer, x => jumpTimer = (int)x);
@@ -78,6 +85,13 @@ public class FirstPersonDrifter: NetworkedMonoBehavior
         {
             GetComponentInChildren<Camera>().enabled = true;
             GetComponentInChildren<AudioListener>().enabled = true;
+            foreach (Transform child in transform)
+            {
+                if (child.name == "advancedCharacter")
+                {
+                    DestroyObject(child.gameObject);
+                }
+            }
         }
         else
         {
@@ -115,14 +129,16 @@ public class FirstPersonDrifter: NetworkedMonoBehavior
         Debug.Log("EXIT: " + obj.transform.name);
     }
     void FixedUpdate() {
-        float inputX = 0;
-        float inputY = 0;
-        if (IsOwner)
+        if (!IsOwner)
+        {
+            animator.SetBool("Jump", jump);
+            animator.SetFloat("MoveSpeed", inputY);
+            animator.SetFloat("MoveDirection", angle);
+        }
+        else
         {
             inputX = Input.GetAxis("Horizontal");
             inputY = Input.GetAxis("Vertical");
-
-            animator.SetFloat("MoveSpeed", inputY);
 
             int angle = (int)Mathf.Round((Mathf.Atan(inputY / inputX) * (180 / Mathf.PI)));
             if (inputX < 0)
@@ -130,7 +146,6 @@ public class FirstPersonDrifter: NetworkedMonoBehavior
             if (angle < 0)
                 angle = 360 + angle;
             Debug.Log(inputX +", " + inputY +", " + angle);
-            animator.SetFloat("MoveDirection", inputY);
             // If both horizontal and vertical are used simultaneously, limit speed (if allowed), so the total doesn't exceed normal move speed
             float inputModifyFactor = (inputX != 0.0f && inputY != 0.0f && limitDiagonalSpeed)? .7071f : 1.0f;
  
@@ -185,7 +200,7 @@ public class FirstPersonDrifter: NetworkedMonoBehavior
                 }
                 else if (jumpTimer >= antiBunnyHopFactor)
                 {
-                    animator.SetBool("Jump", true);
+                    jump = true;
                     moveDirection.y = jumpSpeed;
                     jumpTimer = 0;
                 }
